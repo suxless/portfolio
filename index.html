@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}</style>
+<title>Frontend Portfolio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;500;700&family=Manrope:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: фиксированная 3D-сцена на фоне, контент поверх; объект переезжает между секциями по data-stage */
+:root {
+  --bg: #0b0c11;
+  --bg-glass: rgba(11, 12, 17, 0.72);
+  --fg: #ebe9e3;
+  --muted: #8d8f9c;
+  --line: rgba(235, 233, 227, 0.12);
+  --accent: #a9bcff;
+  --accent-ink: #0b0c11;
+  --obj-base: #1f2338;
+  --obj-accent: #7c93ff;
+  --obj-rim: #e9efff;
+  --dust: #8d96c8;
+  --font-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --font-body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #eeede8;
+    --bg-glass: rgba(238, 237, 232, 0.78);
+    --fg: #101119;
+    --muted: #5b5d69;
+    --line: rgba(16, 17, 25, 0.14);
+    --accent: #2f46c9;
+    --accent-ink: #f4f3ee;
+    --obj-base: #cdd2e6;
+    --obj-accent: #5870e6;
+    --obj-rim: #101119;
+    --dust: #56609e;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #eeede8;
+  --bg-glass: rgba(238, 237, 232, 0.78);
+  --fg: #101119;
+  --muted: #5b5d69;
+  --line: rgba(16, 17, 25, 0.14);
+  --accent: #2f46c9;
+  --accent-ink: #f4f3ee;
+  --obj-base: #cdd2e6;
+  --obj-accent: #5870e6;
+  --obj-rim: #101119;
+  --dust: #56609e;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--bg);
+  z-index: 30;
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+#gl {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+.page { position: relative; z-index: 1; }
+.wrap {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* header */
+.top {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 20;
+  background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 0.9rem; }
+.logo { font-family: var(--font-display); font-weight: 500; font-size: 0.85rem; letter-spacing: 0.02em; text-decoration: none; display: inline-flex; align-items: center; gap: 0.6rem; }
+.logo i { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--accent); display: inline-block; }
+.nav { display: flex; gap: 1.6rem; font-family: var(--font-mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.nav a { text-decoration: none; color: var(--muted); transition: color 0.2s; }
+.nav a:hover { color: var(--fg); }
+
+/* hero */
+.hero { padding-block: clamp(4rem, 12vh, 8.5rem) clamp(4rem, 10vh, 7rem); }
+.eyebrow { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin: 0 0 1.4rem; }
+h1 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2rem, 5.6vw, 4.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin: 0;
+  max-width: 14ch;
+  text-wrap: balance;
+}
+.lead { max-width: 46ch; color: var(--muted); font-size: clamp(1rem, 1.5vw, 1.15rem); margin: 1.8rem 0 2.2rem; }
+.cta { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+.btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  padding: 0.85rem 1.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  background: transparent;
+  color: var(--fg);
+  transition: transform 0.2s, background 0.2s, border-color 0.2s;
+}
+.btn:hover { border-color: var(--fg); transform: translateY(-2px); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.primary:hover { transform: translateY(-2px) scale(1.02); }
+.meta { margin-top: clamp(3rem, 8vh, 5rem); display: flex; flex-wrap: wrap; gap: 0.5rem 1.6rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); }
+
+.rise { animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.rise:nth-child(2) { animation-delay: 0.08s; }
+.rise:nth-child(3) { animation-delay: 0.16s; }
+.rise:nth-child(4) { animation-delay: 0.24s; }
+.rise:nth-child(5) { animation-delay: 0.32s; }
+@keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+
+/* sections */
+section { padding-block: clamp(3.5rem, 9vh, 6.5rem); }
+.sec-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.8rem 2rem; margin-bottom: 2.4rem; }
+h2 { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.5rem, 3.2vw, 2.4rem); letter-spacing: -0.015em; line-height: 1.15; margin: 0; text-wrap: balance; }
+.note { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); letter-spacing: 0.04em; margin: 0; }
+
+/* projects */
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.2rem 1.6rem; }
+.proj { display: flex; flex-direction: column; gap: 1rem; text-decoration: none; min-width: 0; }
+.cover {
+  aspect-ratio: 16 / 10;
+  max-width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(70% 90% at var(--x1, 20%) var(--y1, 20%), color-mix(in srgb, var(--accent) 75%, transparent), transparent 62%),
+    radial-gradient(60% 80% at var(--x2, 85%) var(--y2, 80%), color-mix(in srgb, var(--obj-accent) 55%, transparent), transparent 65%),
+    color-mix(in srgb, var(--bg) 88%, var(--fg));
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.3s;
+}
+.cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 36px 36px;
+  opacity: 0.55;
+  mask-image: radial-gradient(circle at 50% 50%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 20%, transparent 75%);
+}
+.cover b {
+  position: absolute;
+  left: 1rem;
+  bottom: 0.9rem;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+.proj:hover .cover { transform: translateY(-5px); border-color: var(--accent); }
+.proj-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.proj h3 { font-family: var(--font-display); font-weight: 500; font-size: 1.15rem; margin: 0; letter-spacing: -0.01em; }
+.year { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); flex: none; }
+.proj p { margin: 0; color: var(--muted); font-size: 0.95rem; max-width: 52ch; }
+.tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.1rem; }
+.tags span { font-family: var(--font-mono); font-size: 0.7rem; padding: 0.2rem 0.6rem; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
+.tags .go { color: var(--accent); border-color: var(--accent); }
+
+/* skills */
+.skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.skill { padding: 1.8rem 1.6rem 1.8rem 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.skill:nth-child(even) { padding-left: 1.6rem; padding-right: 0; border-left: 1px solid var(--line); }
+.skill h3 { font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; margin: 0 0 0.6rem; }
+.skill p { margin: 0; color: var(--muted); max-width: 44ch; font-size: 0.95rem; }
+.stack { margin-top: 2.4rem; display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted); }
+.stack span { color: var(--fg); }
+
+/* contact */
+.contact { padding-bottom: clamp(4rem, 10vh, 7rem); }
+.contact h2 { font-size: clamp(1.9rem, 5vw, 3.6rem); max-width: 16ch; }
+.mail-row { margin-top: 2.2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem 1rem; }
+.mail { font-family: var(--font-mono); font-size: clamp(1rem, 2.4vw, 1.4rem); padding: 0.4rem 0; border-bottom: 1px solid var(--line); user-select: all; }
+.links { margin-top: 1.8rem; display: flex; flex-wrap: wrap; gap: 0.5rem 1.8rem; font-family: var(--font-mono); font-size: 0.85rem; }
+.links a { color: var(--muted); text-decoration: none; border-bottom: 1px solid transparent; transition: color 0.2s, border-color 0.2s; }
+.links a:hover { color: var(--fg); border-color: var(--accent); }
+.links a[hidden] { display: none; }
+.msg { margin-top: 2.4rem; max-width: 520px; display: grid; gap: 0.8rem; padding: 1.4rem; border: 1px solid var(--line); border-radius: 18px; background: var(--bg-glass); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.msg h3 { margin: 0; font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; }
+.msg label { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); display: grid; gap: 0.35rem; }
+.msg input, .msg textarea { font: inherit; font-size: 0.95rem; letter-spacing: 0; text-transform: none; color: var(--fg); background: transparent; border: 1px solid var(--line); border-radius: 12px; padding: 0.7rem 0.9rem; width: 100%; resize: vertical; }
+.msg input:focus, .msg textarea:focus { outline: none; border-color: var(--accent); }
+.msg-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.msg-note { margin: 0; min-height: 1.4em; font-size: 0.82rem; color: var(--muted); }
+
+footer { border-top: 1px solid var(--line); background: var(--bg-glass); }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.6rem 2rem; padding-block: 1.4rem; font-family: var(--font-mono); font-size: 0.74rem; color: var(--muted); }
+
+/* render HUD */
+#hud {
+  position: fixed;
+  left: max(16px, env(safe-area-inset-left, 0px));
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  z-index: 15;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--bg-glass);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+#hud[hidden] { display: none !important; }
+
+@media (max-width: 760px) {
+  #gl { opacity: 0.5; }
+  .nav { gap: 1rem; font-size: 0.7rem; }
+  .grid, .skills { grid-template-columns: minmax(0, 1fr); }
+  .skill, .skill:nth-child(even) { padding: 1.5rem 0; border-left: 0; }
+  h1 { max-width: 12ch; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise { animation: none; }
+  html { scroll-behavior: auto; }
+  .cover, .btn { transition: none; }
+}
+</style>
+
+<canvas id="gl" aria-hidden="true"></canvas>
+<div id="hud" aria-hidden="true" hidden></div>
+
+<div class="page">
+  <header class="top">
+    <div class="wrap">
+      <a class="logo" href="#top"><i></i>Suxless</a>
+      <nav class="nav" aria-label="Разделы">
+        <a href="#work">Работы</a>
+        <a href="#skills">Навыки</a>
+        <a href="#contact">Контакты</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero" data-stage="2.3,0.1,1,1">
+      <div class="wrap">
+        <p class="eyebrow rise">Frontend · UI · 3D</p>
+        <h1 class="rise">Премиальные сайты, в которых есть глубина</h1>
+        <p class="lead rise">Я frontend-разработчик и UI-инженер. Делаю анимированные 3D-сайты для брендов, которым важно первое впечатление: от шейдеров и сцены до аккуратной вёрстки и скорости загрузки.</p>
+        <div class="cta rise">
+          <a class="btn primary" href="#work">Смотреть работы</a>
+          <a class="btn" href="#contact">Обсудить проект</a>
+        </div>
+        <div class="meta rise">
+          <span>Three.js</span><span>WebGL / GLSL</span><span>GSAP</span><span>React</span><span>TypeScript</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="work" data-stage="3.4,0,0.55,0.4">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Избранные работы</h2>
+          <p class="note">Примеры проектов: замените названия, описания и цифры на свои</p>
+        </div>
+        <div class="grid">
+          <a class="proj" href="olkha-showroom.html" target="_blank" rel="noopener">
+            <div class="cover" style="--x1:18%;--y1:25%;--x2:88%;--y2:85%"><b>3D-магазин · 5 моделей</b></div>
+            <div class="proj-row"><h3>Ольха Шоурум</h3><span class="year">2026</span></div>
+            <p>Магазин мебели: пять 3D-моделей, конфигуратор ткани и дерева, размеры, разбор на детали, комната со сменой времени суток и корзина.</p>
+            <div class="tags"><span>Three.js</span><span>WebGL</span><span>JavaScript</span><span class="go">Смотреть сайт ↗</span></div>
+          </a>
+          <a class="proj" href="#contact">
+            <div class="cover" style="--x1:80%;--y1:20%;--x2:15%;--y2:80%"><b>Scroll-история · LCP 1.4 s</b></div>
+            <div class="proj-row"><h3>Meridian</h3><span class="year">2025</span></div>
+            <p>Сайт часового бренда. Механизм собирается из деталей по мере скролла, текст и камера идут по одной таймлинии.</p>
+            <div class="tags"><span>WebGL</span><span>ScrollTrigger</span><span>Lenis</span></div>
+          </a>
+          <a class="proj" href="#contact">
+            <div class="cover" style="--x1:50%;--y1:10%;--x2:50%;--y2:95%"><b>Шейдеры · 1 draw call</b></div>
+            <div class="proj-row"><h3>Volt Studio</h3><span class="year">2025</span></div>
+            <p>Hero-экран с жидким шейдером на курсор. Работает на слабых телефонах благодаря адаптивному качеству.</p>
+            <div class="tags"><span>GLSL</span><span>R3F</span><span>Vite</span></div>
+          </a>
+          <a class="proj" href="#contact">
+            <div class="cover" style="--x1:25%;--y1:75%;--x2:80%;--y2:22%"><b>Дизайн-система · 48 компонентов</b></div>
+            <div class="proj-row"><h3>Atlas</h3><span class="year">2024</span></div>
+            <p>UI-библиотека и дашборд для логистической платформы: токены, тёмная тема, доступность из коробки.</p>
+            <div class="tags"><span>React</span><span>TypeScript</span><span>Storybook</span></div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills" data-stage="-3.1,0,0.8,0.4">
+      <div class="wrap">
+        <div class="sec-head"><h2>Что я делаю</h2></div>
+        <div class="skills">
+          <div class="skill">
+            <h3>3D и WebGL</h3>
+            <p>Сцены на Three.js и React Three Fiber, собственные шейдеры, загрузка моделей с Draco и KTX2, постобработка без потери кадров.</p>
+          </div>
+          <div class="skill">
+            <h3>Анимация и скролл</h3>
+            <p>Таймлинии на GSAP, сцены, которые ведёт прокрутка, микровзаимодействия с понятным откликом. Уважаю prefers-reduced-motion.</p>
+          </div>
+          <div class="skill">
+            <h3>Производительность</h3>
+            <p>Бюджет кадра, LOD, инстансинг, ленивая загрузка тяжёлых ассетов. Сайт выглядит дорого и при этом быстро открывается.</p>
+          </div>
+          <div class="skill">
+            <h3>Интерфейсы и системы</h3>
+            <p>Вёрстка по макету с точностью до пикселя, дизайн-токены, светлая и тёмная темы, адаптив от телефона до 4K.</p>
+          </div>
+        </div>
+        <div class="stack"><span>Three.js</span><span>R3F</span><span>GLSL</span><span>GSAP</span><span>React</span><span>Next.js</span><span>TypeScript</span><span>Vite</span><span>Figma</span></div>
+      </div>
+    </section>
+
+    <section id="contact" class="contact" data-stage="2.6,-0.2,1.1,0.55">
+      <div class="wrap">
+        <h2>Расскажите о вашем проекте</h2>
+        <div class="mail-row">
+          <span class="mail" id="mail"></span>
+          <button class="btn" id="copy" type="button">Скопировать</button>
+          <a class="btn primary" id="mail-link" href="#contact">Написать</a>
+        </div>
+        <div class="links">
+          <a id="lnk-tg" href="#contact" target="_blank" rel="noopener">Telegram</a>
+          <a id="lnk-gh" href="#contact" target="_blank" rel="noopener">GitHub</a>
+          <a id="lnk-be" href="#contact" target="_blank" rel="noopener">Instagram</a>
+        </div>
+        <form class="msg" id="msg-form" novalidate>
+          <h3>Быстрое сообщение</h3>
+          <label for="m-name">Как вас зовут<input id="m-name" type="text" autocomplete="name" placeholder="Анна"></label>
+          <label for="m-text">О проекте<textarea id="m-text" rows="4" placeholder="Нужен сайт с 3D-анимацией для бренда, срок один месяц"></textarea></label>
+          <div class="msg-actions">
+            <button class="btn primary" id="m-tg" type="submit">Отправить в Telegram</button>
+            <button class="btn" id="m-copy" type="button">Скопировать текст</button>
+          </div>
+          <p class="msg-note" id="m-note" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap"><span>© 2026 Suxless</span><span>Сделано на Three.js</span></div>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  var root = document.documentElement;
+
+  /* контакты: впишите свои данные здесь, остальное работает само */
+  var CONTACTS = {
+    email: "roka80929@gmail.com",
+    telegram: "suxlessui",
+    github: "roka80929-afk",
+    instagram: "roka80929"
+  };
+
+  function $(id) { return document.getElementById(id); }
+  function copyText(text, onOk, onFail) {
+    function legacy() {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.setAttribute("readonly", "");
+        ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        var ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        ok ? onOk() : onFail();
+      } catch (e) { onFail(); }
+    }
+    try { navigator.clipboard.writeText(text).then(onOk, legacy); } catch (e) { legacy(); }
+  }
+
+  var mail = $("mail"), copyBtn = $("copy");
+  mail.textContent = CONTACTS.email;
+  $("mail-link").href = "mailto:" + CONTACTS.email + "?subject=" + encodeURIComponent("Проект с сайта");
+  function setLink(id, base, handle) {
+    var a = $(id);
+    if (handle) a.href = base + handle; else a.hidden = true;
+  }
+  setLink("lnk-tg", "https://t.me/", CONTACTS.telegram);
+  setLink("lnk-gh", "https://github.com/", CONTACTS.github);
+  setLink("lnk-be", "https://www.instagram.com/", CONTACTS.instagram);
+
+  copyBtn.addEventListener("click", function () {
+    function done() {
+      copyBtn.textContent = "Скопировано";
+      setTimeout(function () { copyBtn.textContent = "Скопировать"; }, 1800);
+    }
+    function sel() {
+      var r = document.createRange(); r.selectNodeContents(mail);
+      var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    }
+    copyText(CONTACTS.email, done, sel);
+  });
+
+  var form = $("msg-form"), note = $("m-note");
+  function composed() {
+    var n = $("m-name").value.trim(), t = $("m-text").value.trim();
+    return (n ? "Здравствуйте, меня зовут " + n + ". " : "Здравствуйте! ") + (t || "Хочу обсудить проект.");
+  }
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var text = composed();
+    if (!CONTACTS.telegram) { note.textContent = "Telegram не указан, скопируйте текст и отправьте любым способом."; return; }
+    copyText(text, function () {}, function () {});
+    window.open("https://t.me/" + CONTACTS.telegram + "?text=" + encodeURIComponent(text), "_blank", "noopener");
+    note.textContent = "Открываю Telegram. Если текст не подставился, он уже скопирован, вставьте его в чат.";
+  });
+  $("m-copy").addEventListener("click", function () {
+    copyText(composed(), function () { note.textContent = "Текст скопирован."; }, function () { note.textContent = "Не удалось скопировать, выделите текст вручную."; });
+  });
+
+  /* 3D-сцена */
+  var canvas = document.getElementById("gl");
+  var hud = document.getElementById("hud");
+  if (!window.THREE) { canvas.hidden = true; return; }
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+  } catch (e) { canvas.hidden = true; return; }
+  renderer.setClearColor(0x000000, 0);
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(40, 1, 0.1, 50);
+  camera.position.z = 7;
+
+  var vert = [
+    "uniform float uTime; uniform float uAmp; uniform float uFreq;",
+    "varying vec3 vNormal; varying vec3 vView; varying float vDisp;",
+    "vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}",
+    "vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}",
+    "vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}",
+    "vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}",
+    "float snoise(vec3 v){",
+    "  const vec2 C=vec2(1.0/6.0,1.0/3.0); const vec4 D=vec4(0.0,0.5,1.0,2.0);",
+    "  vec3 i=floor(v+dot(v,C.yyy)); vec3 x0=v-i+dot(i,C.xxx);",
+    "  vec3 g=step(x0.yzx,x0.xyz); vec3 l=1.0-g;",
+    "  vec3 i1=min(g.xyz,l.zxy); vec3 i2=max(g.xyz,l.zxy);",
+    "  vec3 x1=x0-i1+C.xxx; vec3 x2=x0-i2+C.yyy; vec3 x3=x0-D.yyy;",
+    "  i=mod289(i);",
+    "  vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));",
+    "  float n_=0.142857142857; vec3 ns=n_*D.wyz-D.xzx;",
+    "  vec4 j=p-49.0*floor(p*ns.z*ns.z);",
+    "  vec4 x_=floor(j*ns.z); vec4 y_=floor(j-7.0*x_);",
+    "  vec4 x=x_*ns.x+ns.yyyy; vec4 y=y_*ns.x+ns.yyyy; vec4 h=1.0-abs(x)-abs(y);",
+    "  vec4 b0=vec4(x.xy,y.xy); vec4 b1=vec4(x.zw,y.zw);",
+    "  vec4 s0=floor(b0)*2.0+1.0; vec4 s1=floor(b1)*2.0+1.0; vec4 sh=-step(h,vec4(0.0));",
+    "  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy; vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;",
+    "  vec3 p0=vec3(a0.xy,h.x); vec3 p1=vec3(a0.zw,h.y); vec3 p2=vec3(a1.xy,h.z); vec3 p3=vec3(a1.zw,h.w);",
+    "  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));",
+    "  p0*=norm.x; p1*=norm.y; p2*=norm.z; p3*=norm.w;",
+    "  vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0); m=m*m;",
+    "  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));",
+    "}",
+    "float field(vec3 p){ return snoise(p*uFreq+vec3(0.0,uTime*0.18,uTime*0.1)); }",
+    "vec3 displace(vec3 p){ return p*(1.0+uAmp*field(p)); }",
+    "void main(){",
+    "  vec3 n=normalize(position);",
+    "  vec3 t=normalize(cross(n,abs(n.y)>0.99?vec3(1.0,0.0,0.0):vec3(0.0,1.0,0.0)));",
+    "  vec3 b=normalize(cross(n,t));",
+    "  float e=0.012;",
+    "  vec3 p0=displace(n); vec3 p1=displace(normalize(n+t*e)); vec3 p2=displace(normalize(n+b*e));",
+    "  vNormal=normalize(normalMatrix*cross(p1-p0,p2-p0));",
+    "  vDisp=field(n);",
+    "  vec4 mv=modelViewMatrix*vec4(p0,1.0);",
+    "  vView=mv.xyz;",
+    "  gl_Position=projectionMatrix*mv;",
+    "}"
+  ].join("\n");
+
+  var frag = [
+    "uniform vec3 uBase; uniform vec3 uAccent; uniform vec3 uRim; uniform float uTime; uniform float uAlpha;",
+    "varying vec3 vNormal; varying vec3 vView; varying float vDisp;",
+    "void main(){",
+    "  vec3 N=normalize(vNormal); vec3 V=normalize(-vView);",
+    "  float fres=pow(1.0-max(dot(N,V),0.0),2.6);",
+    "  float bands=0.5+0.5*sin(vDisp*16.0+uTime*0.35+N.y*3.0);",
+    "  vec3 col=mix(uBase,uAccent,bands*0.6);",
+    "  vec3 L=normalize(vec3(0.5,0.8,0.6));",
+    "  float diff=max(dot(N,L),0.0);",
+    "  col*=0.4+0.85*diff;",
+    "  vec3 H=normalize(L+V);",
+    "  col+=uRim*pow(max(dot(N,H),0.0),48.0)*0.5;",
+    "  col=mix(col,uRim,fres*0.85);",
+    "  gl_FragColor=vec4(col,uAlpha);",
+    "}"
+  ].join("\n");
+
+  var uniforms = {
+    uTime: { value: 0 },
+    uAmp: { value: 0.16 },
+    uFreq: { value: 1.15 },
+    uAlpha: { value: 1 },
+    uBase: { value: new THREE.Color() },
+    uAccent: { value: new THREE.Color() },
+    uRim: { value: new THREE.Color() }
+  };
+  var mat = new THREE.ShaderMaterial({ uniforms: uniforms, vertexShader: vert, fragmentShader: frag, transparent: true });
+  var mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(1.5, 48), mat);
+  var group = new THREE.Group();
+  group.add(mesh);
+  scene.add(group);
+
+  /* пыль вокруг объекта */
+  var N = 900, pos = new Float32Array(N * 3);
+  for (var i = 0; i < N; i++) {
+    var r = 3 + Math.random() * 4.5, th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+    pos[i * 3] = r * Math.sin(ph) * Math.cos(th);
+    pos[i * 3 + 1] = r * Math.sin(ph) * Math.sin(th) * 0.7;
+    pos[i * 3 + 2] = r * Math.cos(ph) - 1;
+  }
+  var pg = new THREE.BufferGeometry();
+  pg.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  var pm = new THREE.PointsMaterial({ size: 0.022, sizeAttenuation: true, transparent: true, opacity: 0.7, depthWrite: false });
+  var dust = new THREE.Points(pg, pm);
+  scene.add(dust);
+
+  function tok(n) { return getComputedStyle(root).getPropertyValue(n).trim(); }
+  function applyTheme() {
+    uniforms.uBase.value.set(tok("--obj-base"));
+    uniforms.uAccent.value.set(tok("--obj-accent"));
+    uniforms.uRim.value.set(tok("--obj-rim"));
+    pm.color.set(tok("--dust"));
+    requestOnce();
+  }
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
+  new MutationObserver(applyTheme).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+
+  var stages = Array.prototype.slice.call(document.querySelectorAll("[data-stage]"));
+  var cur = { x: 2.3, y: 0.1, s: 1, a: 1 };
+  var small = false, aspect = 1;
+
+  function target() {
+    var mid = innerHeight * 0.5, st = stages[stages.length - 1];
+    for (var k = 0; k < stages.length; k++) {
+      var rc = stages[k].getBoundingClientRect();
+      if (rc.top <= mid && rc.bottom > mid) { st = stages[k]; break; }
+    }
+    var v = st.getAttribute("data-stage").split(",").map(Number);
+    var x = v[0] * Math.min(1, aspect / 1.6), y = v[1], s = v[2], a = v[3];
+    if (small) { x = 0; y = 0.9; s *= 0.8; }
+    return { x: x, y: y, s: s, a: a };
+  }
+
+  function resize() {
+    var w = innerWidth, h = innerHeight;
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    aspect = w / h;
+    small = w < 760;
+    requestOnce();
+  }
+  addEventListener("resize", resize);
+
+  var mx = 0, my = 0, tmx = 0, tmy = 0;
+  addEventListener("pointermove", function (e) {
+    tmx = (e.clientX / innerWidth) * 2 - 1;
+    tmy = (e.clientY / innerHeight) * 2 - 1;
+  }, { passive: true });
+
+  var last = 0, lastY = scrollY, boost = 0, spin = 0.4;
+  var frames = 0, hudT = 0;
+
+  function step(time, dt, snap) {
+    var sy = scrollY;
+    var vel = Math.abs(sy - lastY) / Math.max(dt, 0.001);
+    lastY = sy;
+    boost += (Math.min(vel / 2500, 1) - boost) * (1 - Math.exp(-dt * 4));
+
+    var tg = target(), k = snap ? 1 : 1 - Math.exp(-dt * 3);
+    cur.x += (tg.x - cur.x) * k;
+    cur.y += (tg.y - cur.y) * k;
+    cur.s += (tg.s - cur.s) * k;
+    cur.a += (tg.a - cur.a) * k;
+    mx += (tmx - mx) * (1 - Math.exp(-dt * 4));
+    my += (tmy - my) * (1 - Math.exp(-dt * 4));
+
+    group.position.set(cur.x, cur.y, 0);
+    group.scale.setScalar(cur.s);
+    spin += dt * (0.12 + boost * 0.9);
+    mesh.rotation.y = spin + mx * 0.35;
+    mesh.rotation.x = my * 0.22 + sy * 0.0004;
+    dust.rotation.y = time * 0.02 + mx * 0.05;
+    dust.rotation.x = my * 0.03;
+
+    uniforms.uTime.value = time;
+    uniforms.uAmp.value = 0.16 + 0.14 * boost;
+    uniforms.uAlpha.value = cur.a;
+    pm.opacity = 0.25 + 0.45 * cur.a;
+
+    renderer.render(scene, camera);
+  }
+
+  function updateHud(time) {
+    frames++;
+    if (time - hudT >= 0.5) {
+      var fps = Math.round(frames / (time - hudT));
+      var inf = renderer.info.render;
+      hud.textContent = "render " + fps + " fps · " + inf.triangles.toLocaleString("ru-RU") + " tris · " + inf.calls + " calls";
+      frames = 0;
+      hudT = time;
+    }
+  }
+
+  function loop(t) {
+    var time = t * 0.001, dt = Math.min(0.05, last ? time - last : 0.016);
+    last = time;
+    if (!document.hidden) {
+      step(time, dt, false);
+      updateHud(time);
+    }
+    requestAnimationFrame(loop);
+  }
+
+  var pending = false;
+  function requestOnce() {
+    if (!reduce || pending) return;
+    pending = true;
+    requestAnimationFrame(function () {
+      pending = false;
+      step(2.0, 0.016, true);
+    });
+  }
+
+  applyTheme();
+  resize();
+  if (reduce) {
+    addEventListener("scroll", requestOnce, { passive: true });
+    step(2.0, 0.016, true);
+    hud.hidden = true;
+  } else {
+    hud.hidden = false;
+    var t0 = target();
+    cur.x = t0.x; cur.y = t0.y; cur.s = t0.s; cur.a = t0.a;
+    requestAnimationFrame(loop);
+  }
+})();
+</script>
+
+</html>
