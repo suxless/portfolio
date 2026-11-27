@@ -777,6 +777,7 @@ function initScene() {
   const balMat = std({ color: 0xe0bd7c, metalness: 1, roughness: 0.2 });
   const jewelMat = std({ color: 0xb3263e, metalness: 0, roughness: 0.08 });
   const screwMat = std({ color: 0xb8b2a8, metalness: 1, roughness: 0.25 });
+  [satin, polish, backMat, rimMat, idxMat, handMat, secMat, glassMat, backGlass, gearMat, bridgeMat, rotorMat, balMat, jewelMat, screwMat].forEach(function (m) { m.color.convertSRGBToLinear(); }); // r128: hex colours are sRGB
   const plateTex = (function () {
     const c = doc.createElement('canvas'); c.width = c.height = 512; const x = c.getContext('2d');
     x.fillStyle = '#b48a55'; x.fillRect(0, 0, 512, 512);
@@ -1066,9 +1067,9 @@ function initScene() {
   /* --- configuration -> materials --- */
   function setConfig() {
     const c = OPT.case[cfg.case], d = OPT.dial[cfg.dial];
-    [satin, polish, backMat, rimMat].forEach(function (m) { m.color.set(c.hex); });
-    if (d.dark) { [idxMat, handMat].forEach(function (m) { m.color.set(0x2a0a14); m.metalness = 0.55; m.roughness = 0.3; }); }
-    else { [idxMat, handMat].forEach(function (m) { m.color.set(c.hex); m.metalness = 1; m.roughness = 0.18; }); }
+    [satin, polish, backMat, rimMat].forEach(function (m) { m.color.set(c.hex).convertSRGBToLinear(); });
+    if (d.dark) { [idxMat, handMat].forEach(function (m) { m.color.set(0x2a0a14).convertSRGBToLinear(); m.metalness = 0.55; m.roughness = 0.3; }); }
+    else { [idxMat, handMat].forEach(function (m) { m.color.set(c.hex).convertSRGBToLinear(); m.metalness = 1; m.roughness = 0.18; }); }
     drawDial(); buildStrap(); kick();
   }
   if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(function () { drawDial(); });
@@ -1215,7 +1216,7 @@ function initScene() {
     const step = storyInfo.step, hl = activeStage.id === 'story' ? (step === 1 ? [0, 1] : step === 2 ? [2] : step === 3 ? [3] : step === 4 ? [4, 5] : step === 5 ? [6, 7] : []) : [];
     layers.forEach(function (L, i) {
       L.goal = hl.indexOf(i) >= 0 ? 1 : 0; L.hl = lerp(L.hl, L.goal, 1 - Math.exp(-dt * 8));
-      L.mats.forEach(function (m) { if (m.emissive) { m.emissive.set(0xC77D4B); m.emissiveIntensity = L.hl * 0.5; } });
+      L.mats.forEach(function (m) { if (m.emissive) { m.emissive.set(0xC77D4B).convertSRGBToLinear(); m.emissiveIntensity = L.hl * 0.5; } });
     });
     // time & mechanics
     const dd = new Date(), ms = dd.getMilliseconds(); let sec = dd.getSeconds() + (reduce ? 0 : ms / 1000);
