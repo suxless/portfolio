@@ -1,0 +1,1251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ORVELLE — Meridian</title>
+<meta name="description" content="ORVELLE Meridian — an interactive 3D concept for a fictional mechanical watch brand.">
+<meta name="theme-color" content="#3A0F1C">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ---------- Design tokens ---------- */
+:root{
+  --bg:#3A0F1C; --plum:#531A2A; --wine:#2A0A14;
+  --copper:#C77D4B; --gold:#D9B87A; --pearl:#F0E2CF; --rose:#C9A3A0; --teal:#5FB7AE;
+  --line:rgba(217,184,122,.22); --line-strong:rgba(217,184,122,.5);
+  --glass:rgba(42,10,20,.62);
+  --f-display:"Cormorant Garamond","Cormorant",Georgia,"Times New Roman",serif;
+  --f-text:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem; --s5:1.5rem; --s6:2rem; --s7:3rem; --s8:5rem; --s9:8rem;
+  --r1:.5rem; --r2:1rem; --r3:1.5rem; --rpill:999px;
+  --shadow:0 24px 60px -24px rgba(0,0,0,.65);
+  --ease:cubic-bezier(.22,.8,.2,1);
+  --t-fast:.18s; --t-med:.45s;
+  --wrap:1320px;
+  --gut:max(20px,env(safe-area-inset-left,0px));
+  --fs-hero:clamp(3rem,7.4vw,7rem);
+  --fs-h2:clamp(2.2rem,4.6vw,4.2rem);
+  --fs-h3:clamp(1.4rem,2vw,1.8rem);
+  --fs-body:clamp(1rem,.35vw + .94rem,1.125rem);
+  --fs-small:.8125rem;
+  /* configurator-driven (also used by the no-WebGL fallback) */
+  --c-case:#D9B87A; --c-dial:#531A2A; --c-strap:#4a1420; --c-ink:#D9B87A;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--pearl);font:400 var(--fs-body)/1.6 var(--f-text);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+   radial-gradient(60vw 60vw at 78% 18%,rgba(199,125,75,.16),transparent 60%),
+   radial-gradient(50vw 50vw at 8% 70%,rgba(95,183,174,.07),transparent 60%),
+   radial-gradient(90vw 70vw at 50% 110%,var(--wine),transparent 70%);}
+img,svg{max-width:100%}
+a{color:inherit}
+h1,h2,h3{font-family:var(--f-display);font-weight:500;line-height:1.02;margin:0;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0;max-width:62ch}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:4px}
+.skip{position:absolute;left:12px;top:-60px;z-index:100;background:var(--pearl);color:var(--wine);padding:.6rem 1rem;border-radius:var(--r1);font-weight:600;transition:top var(--t-fast)}
+.skip:focus{top:12px}
+.eyebrow{font-size:var(--fs-small);letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:600;display:flex;align-items:center;gap:.75rem}
+.eyebrow::before{content:"";width:2rem;height:1px;background:var(--gold)}
+.wrap{width:100%;max-width:var(--wrap);margin:0 auto;padding-inline:var(--gut)}
+main,footer,header{position:relative;z-index:2}
+
+/* ---------- Buttons ---------- */
+.btn{--bb:var(--gold);display:inline-flex;align-items:center;justify-content:center;gap:.6rem;min-height:48px;padding:.8rem 1.6rem;
+  border-radius:var(--rpill);border:1px solid var(--bb);background:transparent;color:var(--pearl);font:600 .9375rem/1 var(--f-text);
+  letter-spacing:.04em;text-decoration:none;cursor:pointer;transition:background var(--t-fast),color var(--t-fast),border-color var(--t-fast),transform var(--t-fast) var(--ease)}
+.btn:hover{background:rgba(217,184,122,.14)}
+.btn:active{transform:translateY(1px) scale(.985)}
+.btn[disabled],.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;pointer-events:none}
+.btn-primary{background:linear-gradient(180deg,#e2c68f,var(--gold));color:var(--wine);border-color:transparent}
+.btn-primary:hover{background:linear-gradient(180deg,#f0d9a6,#e0c288)}
+.btn-ghost{border-color:var(--line-strong)}
+
+/* ---------- Header ---------- */
+.hdr{position:fixed;top:0;left:0;right:0;z-index:60;padding-top:env(safe-area-inset-top,0px);
+  background:linear-gradient(180deg,rgba(42,10,20,.82),rgba(42,10,20,0));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.hdr .wrap{display:flex;align-items:center;justify-content:space-between;height:72px;gap:1rem}
+.logo{display:inline-flex;align-items:center;gap:.7rem;text-decoration:none;color:var(--pearl)}
+.logo svg{width:30px;height:30px;flex:none}
+.logo b{font:600 1.45rem/1 var(--f-display);letter-spacing:.32em;margin-right:-.32em}
+.nav{display:flex;align-items:center;gap:2rem}
+.nav a.lnk{font-size:.875rem;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;color:var(--rose);padding:.5rem 0;position:relative;transition:color var(--t-fast)}
+.nav a.lnk::after{content:"";position:absolute;left:0;right:0;bottom:.15rem;height:1px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform var(--t-med) var(--ease)}
+.nav a.lnk:hover,.nav a.lnk[aria-current="true"]{color:var(--pearl)}
+.nav a.lnk:hover::after,.nav a.lnk[aria-current="true"]::after{transform:scaleX(1)}
+.nav .btn{min-height:42px;padding:.6rem 1.2rem;font-size:.8125rem}
+.burger{display:none;width:48px;height:48px;border-radius:50%;border:1px solid var(--line-strong);background:var(--glass);cursor:pointer;color:var(--pearl);align-items:center;justify-content:center;padding:0}
+.burger span{display:block;width:20px;height:1.5px;background:currentColor;position:relative;transition:background var(--t-fast)}
+.burger span::before,.burger span::after{content:"";position:absolute;left:0;width:20px;height:1.5px;background:currentColor;transition:transform var(--t-med) var(--ease)}
+.burger span::before{top:-6px}.burger span::after{top:6px}
+.burger[aria-expanded="true"] span{background:transparent}
+.burger[aria-expanded="true"] span::before{transform:translateY(6px) rotate(45deg)}
+.burger[aria-expanded="true"] span::after{transform:translateY(-6px) rotate(-45deg)}
+
+/* ---------- Canvas ---------- */
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:0;transition:opacity .9s var(--ease)}
+#gl.on{opacity:1}
+#labels{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;display:flex;align-items:center;gap:.6rem;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--pearl);white-space:nowrap;opacity:0;transition:opacity .35s}
+.lbl i{display:block;width:44px;height:1px;background:var(--gold)}
+.lbl.left{flex-direction:row-reverse}
+.lbl.on{opacity:1}
+.lbl.act{color:var(--gold)}
+.lbl span{background:var(--glass);padding:.3rem .6rem;border-radius:var(--rpill);border:1px solid var(--line)}
+
+/* anchors (where the single shared 3D watch parks) */
+.anchor{position:relative;touch-action:pan-y;cursor:grab;outline-offset:-4px;border-radius:var(--r3)}
+.anchor.drag{cursor:grabbing}
+.loader{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:1rem;color:var(--rose);font-size:var(--fs-small);letter-spacing:.2em;text-transform:uppercase;transition:opacity .6s;pointer-events:none}
+.loader.done{opacity:0;visibility:hidden}
+.ring{width:54px;height:54px;border-radius:50%;border:1px solid var(--line);border-top-color:var(--gold);animation:spin 1.1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fb{display:none;position:absolute;inset:0;place-items:center}
+.nogl .fb{display:grid}
+.nogl .loader{display:none}
+.fb svg{width:min(100%,360px);height:auto;max-height:100%}
+
+/* ---------- Hero ---------- */
+section{position:relative}
+.hero{min-height:100vh;min-height:100svh;display:flex;align-items:center;padding-block:110px 60px}
+.hero .grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:var(--s6);align-items:center;width:100%}
+.hero h1{font-size:var(--fs-hero);margin-block:1.25rem 1.5rem}
+.hero h1 em{font-style:italic;color:var(--gold)}
+.hero .lead{color:var(--rose);font-size:clamp(1.05rem,1vw + .8rem,1.3rem);line-height:1.55}
+.cta{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:2.2rem}
+.specline{display:flex;flex-wrap:wrap;gap:.5rem 1.6rem;margin-top:2.6rem;padding-top:1.4rem;border-top:1px solid var(--line);font-size:var(--fs-small);letter-spacing:.14em;text-transform:uppercase;color:var(--rose)}
+.specline b{color:var(--gold);font-weight:600;margin-right:.4rem}
+.hero-stage{height:min(78vh,720px);min-height:380px}
+.ticks{position:absolute;inset:0;pointer-events:none;border:1px solid var(--line);border-radius:var(--r3);
+  background:
+   linear-gradient(var(--line),var(--line)) 50% 0/1px 14px no-repeat,
+   linear-gradient(var(--line),var(--line)) 50% 100%/1px 14px no-repeat,
+   linear-gradient(var(--line),var(--line)) 0 50%/14px 1px no-repeat,
+   linear-gradient(var(--line),var(--line)) 100% 50%/14px 1px no-repeat}
+.tag{position:absolute;font-size:.6875rem;letter-spacing:.16em;text-transform:uppercase;color:var(--rose);pointer-events:none}
+.tag.a{left:14px;top:12px}.tag.b{right:14px;top:12px;text-align:right}.tag.c{left:14px;bottom:12px}.tag.d{right:14px;bottom:12px;text-align:right}
+
+/* ---------- Story ---------- */
+.story{height:300vh}
+.pin{position:sticky;top:0;height:100vh;height:100svh;display:flex;align-items:center;padding-top:72px}
+.pin>.wrap{height:100%;display:flex;align-items:center}
+.pin .grid{display:grid;grid-template-columns:minmax(300px,.8fr) minmax(0,1.2fr);gap:var(--s6);align-items:center;width:100%}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:var(--r3);padding:clamp(1.25rem,2.4vw,2.2rem);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--shadow)}
+.story h2{font-size:var(--fs-h2);margin-block:1rem 1.2rem}
+.steps{list-style:none;padding:0;margin:1.6rem 0 0;display:grid;gap:.15rem}
+.steps li{display:grid;grid-template-columns:2.2rem 1fr;gap:.5rem;padding:.55rem 0;color:var(--rose);opacity:.55;transition:opacity var(--t-med),color var(--t-med);font-size:.95rem}
+.steps li span{font:600 .75rem/1.9 var(--f-text);letter-spacing:.12em;color:var(--gold)}
+.steps li.on{opacity:1;color:var(--pearl)}
+.steps li b{display:block;font-weight:600;color:inherit}
+.steps li small{display:none;font-size:.875rem;color:var(--rose);max-width:44ch}
+.steps li.on small{display:block}
+.progress{height:2px;background:var(--line);border-radius:2px;margin-top:1.4rem;overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--gold)}
+.story-stage{height:min(80vh,760px)}
+
+/* ---------- Generic sections ---------- */
+.sec{padding-block:clamp(5rem,11vw,9rem)}
+.sec-head{display:grid;gap:1.1rem;margin-bottom:clamp(2.5rem,5vw,4.5rem)}
+.sec-head h2{font-size:var(--fs-h2)}
+.sec-head p{color:var(--rose)}
+
+/* Craft */
+.craft .grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:var(--s6);align-items:center}
+.craft-stage{height:min(72vh,640px);min-height:380px}
+.hot{position:absolute;left:0;top:0;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:1px solid var(--gold);background:rgba(42,10,20,.7);color:var(--gold);cursor:pointer;display:grid;place-items:center;font:700 .8125rem/1 var(--f-text);padding:0;opacity:0;pointer-events:none;transition:opacity .35s,background var(--t-fast),color var(--t-fast);z-index:5}
+.hot.vis{opacity:1;pointer-events:auto}
+.hot::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px solid var(--gold);opacity:.55;animation:pulse 2.4s var(--ease) infinite}
+.hot:hover,.hot[aria-pressed="true"]{background:var(--gold);color:var(--wine)}
+@keyframes pulse{0%{transform:scale(.7);opacity:.7}100%{transform:scale(1.35);opacity:0}}
+.tabs{display:grid;gap:.6rem;margin-bottom:1.4rem}
+.tab{display:grid;grid-template-columns:2.4rem 1fr;gap:.2rem .7rem;text-align:left;width:100%;padding:1rem 1.1rem;border-radius:var(--r2);border:1px solid var(--line);background:transparent;color:var(--pearl);font:inherit;cursor:pointer;transition:background var(--t-fast),border-color var(--t-fast)}
+.tab:hover{background:rgba(217,184,122,.08)}
+.tab[aria-selected="true"]{background:rgba(217,184,122,.12);border-color:var(--gold)}
+.tab span{font:600 .75rem/1.9 var(--f-text);letter-spacing:.12em;color:var(--gold)}
+.tab b{font:500 1.35rem/1.2 var(--f-display)}
+.panel{min-height:15.5rem}
+.panel h3{font-size:var(--fs-h3);margin-bottom:.8rem}
+.panel p{color:var(--rose)}
+.panel dl{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.4rem 0 0;padding-top:1.2rem;border-top:1px solid var(--line)}
+.panel dt{font-size:.6875rem;letter-spacing:.16em;text-transform:uppercase;color:var(--rose)}
+.panel dd{margin:.25rem 0 0;font:500 1.35rem/1.1 var(--f-display);color:var(--gold)}
+.note{font-size:var(--fs-small);color:var(--rose);margin-top:1rem;opacity:.85}
+
+/* Configurator */
+.cfg .grid{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:var(--s6);align-items:center}
+.cfg-stage{height:min(74vh,680px);min-height:400px;order:2}
+.cfg-ui{order:1}
+.opt{border:0;padding:0;margin:0 0 1.6rem;min-width:0}
+.opt legend{font-size:var(--fs-small);letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:.8rem;padding:0}
+.opt .row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
+.chip{display:grid;justify-items:start;gap:.55rem;padding:.8rem .8rem .9rem;border-radius:var(--r2);border:1px solid var(--line);background:rgba(42,10,20,.35);color:var(--pearl);font:500 .875rem/1.25 var(--f-text);cursor:pointer;text-align:left;transition:border-color var(--t-fast),background var(--t-fast),transform var(--t-fast) var(--ease);min-height:84px}
+.chip:hover{background:rgba(217,184,122,.1)}
+.chip:active{transform:scale(.98)}
+.chip[aria-checked="true"]{border-color:var(--gold);background:rgba(217,184,122,.16);box-shadow:inset 0 0 0 1px var(--gold)}
+.chip[disabled]{opacity:.4;cursor:not-allowed}
+.sw{width:26px;height:26px;border-radius:50%;border:1px solid rgba(240,226,207,.5);background:var(--sw);box-shadow:inset 0 -6px 10px rgba(0,0,0,.25),inset 0 4px 6px rgba(255,255,255,.25)}
+.sw.sq{border-radius:6px}
+.summary{margin-top:.4rem;padding:1.2rem 1.3rem;border-radius:var(--r2);border:1px solid var(--line);background:var(--glass);min-height:8.4rem}
+.summary small{display:block;font-size:.6875rem;letter-spacing:.18em;text-transform:uppercase;color:var(--rose)}
+.summary output{display:block;font:500 1.6rem/1.15 var(--f-display);margin:.35rem 0 .3rem;color:var(--pearl)}
+.summary code{font:600 .75rem/1 var(--f-text);letter-spacing:.16em;color:var(--gold)}
+.cfg-actions{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1.2rem}
+
+/* Brand */
+.brand{min-height:120vh;display:flex;align-items:center;padding-block:6rem}
+.brand .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s6);align-items:center;width:100%}
+.brand-stage{height:min(78vh,720px);min-height:380px}
+.brand blockquote{margin:0;font:500 clamp(2rem,4.2vw,3.8rem)/1.08 var(--f-display);text-wrap:balance}
+.brand blockquote em{color:var(--gold)}
+.brand .sig{margin-top:1.6rem;color:var(--rose);font-size:var(--fs-small);letter-spacing:.18em;text-transform:uppercase}
+
+/* Preview form */
+.prev .grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:var(--s6);align-items:center}
+.prev-stage{height:min(66vh,580px);min-height:340px}
+form{display:grid;gap:1.1rem}
+.f{display:grid;gap:.45rem}
+.f label{font-size:var(--fs-small);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.f input,.f textarea{width:100%;font:inherit;color:var(--pearl);background:rgba(42,10,20,.55);border:1px solid var(--line-strong);border-radius:var(--r1);padding:.85rem 1rem;min-height:48px;transition:border-color var(--t-fast),background var(--t-fast)}
+.f input:hover,.f textarea:hover{background:rgba(42,10,20,.75)}
+.f input:focus,.f textarea:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal)}
+.f input[readonly]{color:var(--rose);border-style:dashed}
+.f textarea{resize:vertical;min-height:120px}
+.f [aria-invalid="true"]{border-color:#e48a7e}
+.err{min-height:1.2em;font-size:.8125rem;color:#f0a79b}
+.ok{padding:1rem 1.2rem;border-radius:var(--r2);border:1px solid var(--teal);background:rgba(95,183,174,.12);color:var(--pearl)}
+.ok[hidden]{display:none}
+
+/* Footer */
+footer{padding-block:3.5rem calc(2.5rem + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:linear-gradient(180deg,transparent,var(--wine))}
+footer .row{display:flex;flex-wrap:wrap;gap:2rem 3rem;justify-content:space-between;align-items:flex-start}
+footer nav{display:flex;flex-wrap:wrap;gap:.4rem 1.6rem}
+footer nav a{font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);text-decoration:none;padding:.5rem 0;min-height:44px;display:inline-flex;align-items:center}
+footer nav a:hover{color:var(--pearl)}
+footer .fine{margin-top:2.2rem;padding-top:1.4rem;border-top:1px solid var(--line);font-size:var(--fs-small);color:var(--rose);display:grid;gap:.35rem}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.rv.in{opacity:1;transform:none}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1023px){
+  .nav .lnk{display:none}
+  .hero .grid,.craft .grid,.cfg .grid,.brand .grid,.prev .grid{grid-template-columns:1fr}
+  .hero-stage{height:56vh;min-height:340px;order:-1;margin-top:.5rem}
+  .hero{padding-top:92px}
+  .cfg-stage{order:-1;height:50vh;min-height:320px}
+  .cfg-ui{order:2}
+  .craft-stage,.prev-stage,.brand-stage{height:52vh;min-height:320px}
+  .brand{min-height:0;padding-block:4rem}
+  .story{height:280vh}
+  .pin .grid{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto;height:100%;padding-block:.6rem 1rem;gap:.6rem}
+  .story-stage{height:100%;min-height:0;order:-1}
+  .story .card{padding:1rem 1.1rem}
+  .story h2{font-size:1.9rem;margin-block:.5rem .4rem}
+  .steps{margin-top:.6rem}
+  .steps li{display:none;padding:0}
+  .steps li.on{display:grid}
+  .story .intro{display:none}
+  .pin{padding-top:68px}
+  .progress{margin-top:.8rem}
+  .lbl{display:none}
+  .opt .row{gap:.45rem}
+  .panel{min-height:0}
+}
+@media (max-width:520px){
+  .hdr .wrap{height:64px}
+  .logo b{font-size:1.2rem}
+  .panel dl{grid-template-columns:1fr 1fr 1fr;gap:.6rem}
+  .panel dd{font-size:1.1rem}
+  .chip{padding:.7rem .6rem;font-size:.8125rem}
+  .specline{gap:.4rem 1rem}
+  .nav .btn{display:none}
+}
+/* mobile menu */
+.mnav{position:fixed;inset:0;z-index:55;display:none;flex-direction:column;justify-content:center;gap:.4rem;padding:5rem var(--gut) 3rem;background:rgba(42,10,20,.96);backdrop-filter:blur(10px)}
+.mnav.open{display:flex}
+.mnav a{font:500 clamp(2rem,9vw,3rem)/1.25 var(--f-display);text-decoration:none;color:var(--pearl);padding:.2rem 0}
+.mnav a:hover{color:var(--gold)}
+@media (max-width:1023px){.burger{display:inline-flex}}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  .rv{opacity:1;transform:none}
+  .hot::after{display:none}
+}
+.nogl #gl,.nogl #labels{display:none}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr" id="top">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="ORVELLE — home">
+      <svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="#D9B87A" stroke-width="1.3"><circle cx="16" cy="16" r="13"/><path d="M16 3v26" stroke-width="1"/><path d="M16 16l6.5-6.5" stroke="#C77D4B" stroke-width="1.6" stroke-linecap="round"/><circle cx="16" cy="16" r="1.6" fill="#D9B87A" stroke="none"/></svg>
+      <b>ORVELLE</b>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a class="lnk" href="#story">Story</a>
+      <a class="lnk" href="#craft">Craft</a>
+      <a class="lnk" href="#configure">Configure</a>
+      <a class="lnk" href="#preview">Preview</a>
+      <a class="btn btn-ghost" href="#story">Explore Meridian</a>
+    </nav>
+    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="mnav" aria-label="Open menu"><span></span></button>
+  </div>
+</header>
+<div class="mnav" id="mnav" role="dialog" aria-modal="true" aria-label="Menu">
+  <a href="#story">Story</a><a href="#craft">Craft</a><a href="#configure">Configure</a><a href="#preview">Preview</a>
+  <a href="#story" class="btn btn-primary" style="margin-top:1.5rem;align-self:flex-start;font-family:var(--f-text);font-size:.95rem">Explore Meridian</a>
+</div>
+
+<canvas id="gl" aria-hidden="true"></canvas>
+<div id="labels" aria-hidden="true"></div>
+
+<main id="main">
+
+<!-- B. HERO -->
+<section class="hero" id="hero" data-stage="hero" aria-labelledby="h-hero">
+  <div class="wrap"><div class="grid">
+    <div>
+      <p class="eyebrow">Meridian · Automatic · Concept 01</p>
+      <h1 id="h-hero">The hour, <em>resolved.</em></h1>
+      <p class="lead">Meridian is an automatic wristwatch designed around one conviction: the movement deserves the same care as the dial. Turn it, open it, configure it.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="#story">Discover Meridian</a>
+        <a class="btn btn-ghost" href="#configure">Configure yours</a>
+      </div>
+      <div class="specline" aria-label="Target specification">
+        <span><b>Ø 40.0</b>mm</span><span><b>10.2</b>mm</span><span><b>72 h</b>reserve*</span><span><b>28,800</b>vph*</span>
+      </div>
+    </div>
+    <div class="anchor hero-stage" data-anchor="hero" tabindex="0" role="img" aria-label="Interactive 3D model of the ORVELLE Meridian watch. Drag or use arrow keys to rotate.">
+      <div class="ticks"></div>
+      <span class="tag a">Ref. MRD-01</span><span class="tag b">Calibre O-27</span><span class="tag c">Sapphire · Domed</span><span class="tag d">Drag to rotate</span>
+      <div class="loader" id="loader"><div class="ring"></div><span>Assembling movement</span></div>
+      <div class="fb" data-fb></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- C. SCROLL STORY -->
+<section class="story" id="story" data-stage="story" aria-labelledby="h-story">
+  <div class="pin"><div class="wrap"><div class="grid">
+    <div class="card" id="storycard">
+      <p class="eyebrow intro">Inside Meridian</p>
+      <h2 id="h-story">Layer by layer</h2>
+      <p class="intro" style="color:var(--rose)">Keep scrolling. The case opens, the layers part, and the movement assembles itself again.</p>
+      <ol class="steps" id="steps" aria-label="Layers of the watch">
+        <li><span>01</span><div><b>Dial, up close</b><small>Sunburst finish, applied indices, dauphine hands.</small></div></li>
+        <li><span>02</span><div><b>Sapphire &amp; hands</b><small>A domed sapphire crystal over three hand-finished hands.</small></div></li>
+        <li><span>03</span><div><b>Dial &amp; indices</b><small>A dial with an open aperture, framed by a polished rim.</small></div></li>
+        <li><span>04</span><div><b>Mainplate &amp; balance</b><small>A skeletonised mainplate carries the oscillating balance.</small></div></li>
+        <li><span>05</span><div><b>Gear train &amp; bridges</b><small>Four wheels, three bridges, ruby jewels at every pivot.</small></div></li>
+        <li><span>06</span><div><b>Rotor &amp; caseback</b><small>The winding rotor sits behind a sapphire caseback.</small></div></li>
+        <li><span>07</span><div><b>Reassembled</b><small>Every layer returns to its place. Time resumes.</small></div></li>
+      </ol>
+      <div class="progress" aria-hidden="true"><i id="prog"></i></div>
+    </div>
+    <div class="anchor story-stage" data-anchor="story" tabindex="0" role="img" aria-label="3D exploded view of the watch, driven by scrolling.">
+      <div class="fb" data-fb></div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- D. CRAFTSMANSHIP -->
+<section class="sec craft" id="craft" data-stage="craft" aria-labelledby="h-craft">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow">Craftsmanship</p>
+      <h2 id="h-craft">Three things, done properly</h2>
+      <p>Select a point on the watch, or a card, to look closer. Figures marked * are fictional design targets for this concept.</p>
+    </div>
+    <div class="grid">
+      <div class="anchor craft-stage" data-anchor="craft" tabindex="0" role="img" aria-label="3D watch with interactive points of interest. Use the buttons beside it to choose a feature.">
+        <button class="hot" type="button" data-feat="0" aria-label="Materials: bezel and crystal" aria-pressed="true">1</button>
+        <button class="hot" type="button" data-feat="1" aria-label="Movement: open aperture" aria-pressed="false">2</button>
+        <button class="hot" type="button" data-feat="2" aria-label="Assembly: crown" aria-pressed="false">3</button>
+        <div class="fb" data-fb></div>
+      </div>
+      <div>
+        <div class="tabs" role="tablist" aria-label="Craftsmanship features">
+          <button class="tab" role="tab" type="button" id="tab0" aria-selected="true" aria-controls="panel" data-feat="0"><span>01</span><b>Materials</b></button>
+          <button class="tab" role="tab" type="button" id="tab1" aria-selected="false" aria-controls="panel" data-feat="1" tabindex="-1"><span>02</span><b>Movement</b></button>
+          <button class="tab" role="tab" type="button" id="tab2" aria-selected="false" aria-controls="panel" data-feat="2" tabindex="-1"><span>03</span><b>Assembly</b></button>
+        </div>
+        <div class="card panel" id="panel" role="tabpanel" aria-labelledby="tab0" aria-live="polite" tabindex="0"></div>
+        <p class="note">* Target values for a fictional product. Nothing here is a claim about a real watch.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- E. CONFIGURATOR -->
+<section class="sec cfg" id="configure" data-stage="cfg" aria-labelledby="h-cfg">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow">Configurator</p>
+      <h2 id="h-cfg">Make it yours</h2>
+      <p>Three choices, nine finishes. The model updates instantly.</p>
+    </div>
+    <div class="grid">
+      <div class="cfg-ui">
+        <fieldset class="opt"><legend>Case</legend><div class="row" role="radiogroup" aria-label="Case material" data-group="case"></div></fieldset>
+        <fieldset class="opt"><legend>Dial</legend><div class="row" role="radiogroup" aria-label="Dial colour" data-group="dial"></div></fieldset>
+        <fieldset class="opt"><legend>Strap</legend><div class="row" role="radiogroup" aria-label="Strap" data-group="strap"></div></fieldset>
+        <div class="summary" aria-live="polite"><small>Your Meridian</small><output id="cfgname" for="cfgform"></output><code id="cfgcode"></code></div>
+        <div class="cfg-actions">
+          <a class="btn btn-primary" id="cfguse" href="#preview">Request private preview</a>
+          <button class="btn btn-ghost" id="cfgreset" type="button">Reset</button>
+        </div>
+      </div>
+      <div class="anchor cfg-stage" data-anchor="cfg" tabindex="0" role="img" aria-label="3D preview of your configured Meridian. Drag or use arrow keys to rotate.">
+        <div class="fb" data-fb></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- F. BRAND STATEMENT -->
+<section class="brand" id="brand" data-stage="brand" aria-labelledby="h-brand">
+  <div class="wrap"><div class="grid">
+    <div class="anchor brand-stage" data-anchor="brand" role="img" aria-label="Macro view of the Meridian dial, indices and hands.">
+      <div class="fb" data-fb></div>
+    </div>
+    <div class="rv">
+      <p class="eyebrow">The idea</p>
+      <h2 id="h-brand" class="sr-only">Brand statement</h2>
+      <blockquote>Noon is not a number. It is the moment the day <em>agrees with itself</em>.</blockquote>
+      <p class="sig">Meridian — named for the line where the sun stops climbing</p>
+    </div>
+  </div></div>
+</section>
+
+<!-- G. PRIVATE PREVIEW -->
+<section class="sec prev" id="preview" data-stage="prev" aria-labelledby="h-prev">
+  <div class="wrap"><div class="grid">
+    <div class="rv">
+      <div class="sec-head" style="margin-bottom:2rem">
+        <p class="eyebrow">Private preview</p>
+        <h2 id="h-prev">Be first to hold it</h2>
+        <p>Leave your details and the configuration you chose. This is a demo form: nothing is sent, stored or shared.</p>
+      </div>
+      <form id="cfgform" novalidate>
+        <div class="f"><label for="f-name">Name</label><input id="f-name" name="name" type="text" autocomplete="name" required aria-describedby="e-name"><div class="err" id="e-name"></div></div>
+        <div class="f"><label for="f-mail">Email</label><input id="f-mail" name="email" type="email" autocomplete="email" required aria-describedby="e-mail"><div class="err" id="e-mail"></div></div>
+        <div class="f"><label for="f-msg">Message <span style="text-transform:none;letter-spacing:0;color:var(--rose);font-weight:400">(optional)</span></label><textarea id="f-msg" name="message" rows="4" aria-describedby="e-msg"></textarea><div class="err" id="e-msg"></div></div>
+        <div class="f"><label for="f-cfg">Selected configuration</label><input id="f-cfg" name="config" type="text" readonly></div>
+        <div><button class="btn btn-primary" type="submit">Request preview</button></div>
+        <div class="ok" id="ok" role="status" hidden></div>
+      </form>
+    </div>
+    <div class="anchor prev-stage" data-anchor="prev" tabindex="0" role="img" aria-label="3D watch in your chosen configuration.">
+      <div class="fb" data-fb></div>
+    </div>
+  </div></div>
+</section>
+</main>
+
+<!-- H. FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <a class="logo" href="#top" aria-label="ORVELLE — back to top"><svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="#D9B87A" stroke-width="1.3"><circle cx="16" cy="16" r="13"/><path d="M16 3v26" stroke-width="1"/><path d="M16 16l6.5-6.5" stroke="#C77D4B" stroke-width="1.6" stroke-linecap="round"/><circle cx="16" cy="16" r="1.6" fill="#D9B87A" stroke="none"/></svg><b>ORVELLE</b></a>
+      <nav aria-label="Footer"><a href="#story">Story</a><a href="#craft">Craft</a><a href="#configure">Configure</a><a href="#preview">Preview</a><a href="#top">Back to top</a></nav>
+    </div>
+    <div class="fine">
+      <span>Independent concept project. ORVELLE is a fictional brand.</span>
+      <span>The 3D watch is generated procedurally in the browser — an artistic model, not a photoreal scan. Specifications marked * are fictional targets.</span>
+    </div>
+  </div>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+'use strict';
+/* ==========================================================================
+   ORVELLE · Meridian — concept site
+   One shared Three.js scene (procedural watch), parked on whichever section
+   anchor is active. UI state lives here and also works without WebGL.
+   ========================================================================== */
+const doc = document, root = doc.documentElement;
+const $ = (s, r) => (r || doc).querySelector(s);
+const $$ = (s, r) => Array.prototype.slice.call((r || doc).querySelectorAll(s));
+const reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const sm = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const isDesktop = () => window.innerWidth >= 1024;
+
+/* ---------- Data ---------- */
+const OPT = {
+  case: [
+    { name: 'Champagne Gold', code: 'CG', hex: '#D9B87A' },
+    { name: 'Rose Copper', code: 'RC', hex: '#C77D4B' },
+    { name: 'Smoked Steel', code: 'SS', hex: '#9B9590' }
+  ],
+  dial: [
+    { name: 'Burgundy Sunburst', code: 'BS', hex: '#6a2336', c0: '#7d2b42', c1: '#531A2A', c2: '#350d19', ink: '#D9B87A', sun: 0.05, dark: false },
+    { name: 'Champagne Grain', code: 'CH', hex: '#E3CFAA', c0: '#f3e7d1', c1: '#e3cfaa', c2: '#c4aa7e', ink: '#3A0F1C', sun: 0.04, dark: true },
+    { name: 'Teal Midnight', code: 'TM', hex: '#1d5753', c0: '#256c67', c1: '#17494a', c2: '#0a282a', ink: '#F0E2CF', sun: 0.05, dark: false }
+  ],
+  strap: [
+    { name: 'Oxblood Calf', code: 'OX', hex: '#5a1a28', kind: 'leather' },
+    { name: 'Sand Suede', code: 'SD', hex: '#a98c6a', kind: 'suede' },
+    { name: 'Link Bracelet', code: 'LB', hex: null, kind: 'bracelet' }
+  ]
+};
+const cfg = { case: 0, dial: 0, strap: 0 };
+let scene3d = null; // set when WebGL scene is ready
+
+const FEATURES = [
+  { t: 'Materials', h: 'Polished and brushed, on purpose',
+    p: 'The case alternates brushed flanks with polished bevels so light travels across it in lines. A domed sapphire crystal with an inner anti-reflective coating* keeps the dial readable at any angle.',
+    d: [['Case', '40 mm'], ['Height', '10.2 mm'], ['Water res.*', '100 m']] },
+  { t: 'Movement', h: 'Calibre O-27, open to the eye',
+    p: 'A skeletonised mainplate, three bridges and ruby jewels at every pivot. The balance beats in a small aperture on the dial; the rotor turns behind a sapphire caseback.',
+    d: [['Jewels*', '27'], ['Reserve*', '72 h'], ['Frequency*', '28,800 vph']] },
+  { t: 'Assembly', h: 'One watchmaker, one watch',
+    p: 'Each Meridian is meant to be assembled, regulated and signed by a single watchmaker. The crown is knurled for grip and sealed against the case with a screw-down tube.',
+    d: [['Positions*', '6'], ['Accuracy*', '±4 s/day'], ['Crown', 'Screw-down']] }
+];
+
+/* ---------- Configurator UI ---------- */
+function buildConfigurator() {
+  ['case', 'dial', 'strap'].forEach(function (g) {
+    const box = $('[data-group="' + g + '"]');
+    OPT[g].forEach(function (o, i) {
+      const b = doc.createElement('button');
+      b.type = 'button'; b.className = 'chip'; b.setAttribute('role', 'radio');
+      b.dataset.g = g; b.dataset.i = i;
+      const sw = doc.createElement('span'); sw.className = 'sw' + (g === 'strap' ? ' sq' : '');
+      const tx = doc.createElement('span'); tx.textContent = o.name;
+      b.appendChild(sw); b.appendChild(tx); box.appendChild(b);
+    });
+    box.addEventListener('click', function (e) {
+      const b = e.target.closest('.chip'); if (b) { cfg[g] = +b.dataset.i; refresh(); }
+    });
+    box.addEventListener('keydown', function (e) {
+      const k = e.key; let d = 0;
+      if (k === 'ArrowRight' || k === 'ArrowDown') d = 1; else if (k === 'ArrowLeft' || k === 'ArrowUp') d = -1; else return;
+      e.preventDefault();
+      const n = OPT[g].length; cfg[g] = (cfg[g] + d + n) % n; refresh();
+      $$('.chip', box)[cfg[g]].focus();
+    });
+  });
+  $('#cfgreset').addEventListener('click', function () { cfg.case = 0; cfg.dial = 0; cfg.strap = 0; refresh(); });
+}
+function cfgText() {
+  return OPT.case[cfg.case].name + ' / ' + OPT.dial[cfg.dial].name + ' / ' + OPT.strap[cfg.strap].name;
+}
+function refresh() {
+  const c = OPT.case[cfg.case], d = OPT.dial[cfg.dial], s = OPT.strap[cfg.strap];
+  const st = root.style;
+  st.setProperty('--c-case', c.hex); st.setProperty('--c-dial', d.hex);
+  st.setProperty('--c-strap', s.hex || c.hex); st.setProperty('--c-ink', d.ink);
+  $$('.chip').forEach(function (b) {
+    const g = b.dataset.g, i = +b.dataset.i, on = cfg[g] === i;
+    b.setAttribute('aria-checked', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1;
+    const sw = $('.sw', b), o = OPT[g][i];
+    if (g === 'case') sw.style.setProperty('--sw', 'linear-gradient(135deg,#fff6e6,' + o.hex + ' 55%,#5a4636)');
+    else if (g === 'dial') sw.style.setProperty('--sw', 'radial-gradient(circle at 35% 30%,' + o.c0 + ',' + o.c2 + ')');
+    else sw.style.setProperty('--sw', o.hex || 'linear-gradient(135deg,#f2ede6,' + c.hex + ' 50%,#6c6761)');
+  });
+  $('#cfgname').textContent = cfgText();
+  $('#cfgcode').textContent = 'MRD-' + c.code + '-' + d.code + '-' + s.code;
+  const fc = $('#f-cfg'); if (fc) fc.value = 'Meridian — ' + cfgText() + ' (MRD-' + c.code + '-' + d.code + '-' + s.code + ')';
+  if (scene3d) scene3d.setConfig();
+}
+
+/* ---------- Craftsmanship tabs / panel ---------- */
+let feat = 0;
+function setFeature(i, focus) {
+  feat = i;
+  $$('.tab').forEach(function (t, k) { t.setAttribute('aria-selected', k === i ? 'true' : 'false'); t.tabIndex = k === i ? 0 : -1; });
+  $$('.hot').forEach(function (h, k) { h.setAttribute('aria-pressed', k === i ? 'true' : 'false'); });
+  const f = FEATURES[i], p = $('#panel');
+  p.setAttribute('aria-labelledby', 'tab' + i);
+  p.textContent = '';
+  const h3 = doc.createElement('h3'); h3.textContent = f.h;
+  const pp = doc.createElement('p'); pp.textContent = f.p;
+  const dl = doc.createElement('dl');
+  f.d.forEach(function (r) {
+    const w = doc.createElement('div'), dt = doc.createElement('dt'), dd = doc.createElement('dd');
+    dt.textContent = r[0]; dd.textContent = r[1]; w.appendChild(dt); w.appendChild(dd); dl.appendChild(w);
+  });
+  p.appendChild(h3); p.appendChild(pp); p.appendChild(dl);
+  if (focus) $$('.tab')[i].focus();
+}
+function buildCraft() {
+  $$('.tab').forEach(function (t) {
+    t.addEventListener('click', function () { setFeature(+t.dataset.feat); });
+    t.addEventListener('keydown', function (e) {
+      let d = 0;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') d = 1; else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') d = -1; else return;
+      e.preventDefault(); setFeature((feat + d + 3) % 3, true);
+    });
+  });
+  $$('.hot').forEach(function (h) { h.addEventListener('click', function () { setFeature(+h.dataset.feat); }); });
+  setFeature(0);
+}
+
+/* ---------- Scroll story HUD (works without WebGL too) ---------- */
+const STEP_AT = [0, 0.17, 0.38, 0.5, 0.62, 0.76, 0.88];
+const storyEl = $('#story');
+function storyP() {
+  const r = storyEl.getBoundingClientRect(), vh = window.innerHeight;
+  return clamp(-r.top / Math.max(1, r.height - vh), 0, 1);
+}
+let lastStep = -1;
+function updateStoryHud() {
+  const p = storyP();
+  $('#prog').style.width = (p * 100).toFixed(1) + '%';
+  let s = 0; for (let i = 0; i < STEP_AT.length; i++) if (p >= STEP_AT[i]) s = i;
+  if (s !== lastStep) {
+    lastStep = s;
+    $$('#steps li').forEach(function (li, i) {
+      li.classList.toggle('on', i === s);
+      if (i === s) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+    });
+  }
+  return { p: p, step: s };
+}
+
+/* ---------- Header, menu, reveals ---------- */
+function buildChrome() {
+  const burger = $('#burger'), mnav = $('#mnav');
+  function setMenu(open) {
+    mnav.classList.toggle('open', open);
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    doc.body.style.overflow = open ? 'hidden' : '';
+    if (open) { const a = $('a', mnav); a && a.focus(); }
+  }
+  burger.addEventListener('click', function () { setMenu(!mnav.classList.contains('open')); });
+  $$('a', mnav).forEach(function (a) { a.addEventListener('click', function () { setMenu(false); }); });
+  doc.addEventListener('keydown', function (e) {
+    if (!mnav.classList.contains('open')) return;
+    if (e.key === 'Escape') { setMenu(false); burger.focus(); return; }
+    if (e.key === 'Tab') {
+      const f = [burger].concat($$('a', mnav)), i = f.indexOf(doc.activeElement);
+      e.preventDefault(); f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
+    }
+  });
+  window.addEventListener('resize', function () { if (window.innerWidth >= 1024 && mnav.classList.contains('open')) setMenu(false); });
+  // reveal
+  const rv = $$('.rv');
+  if ('IntersectionObserver' in window && !reduce) {
+    const io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.15 });
+    rv.forEach(function (n) { io.observe(n); });
+  } else rv.forEach(function (n) { n.classList.add('in'); });
+  // current nav link
+  const links = $$('.nav a.lnk'), secs = ['story', 'craft', 'configure', 'preview'].map(function (id) { return doc.getElementById(id); });
+  function mark() {
+    const mid = window.innerHeight * 0.45; let cur = -1;
+    secs.forEach(function (s, i) { const r = s.getBoundingClientRect(); if (r.top <= mid && r.bottom > mid) cur = i; });
+    links.forEach(function (a, i) { if (i === cur) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+  }
+  window.addEventListener('scroll', mark, { passive: true }); mark();
+}
+
+/* ---------- Form ---------- */
+function buildForm() {
+  const form = $('#cfgform'), ok = $('#ok');
+  const F = { name: $('#f-name'), mail: $('#f-mail'), msg: $('#f-msg') };
+  const E = { name: $('#e-name'), mail: $('#e-mail'), msg: $('#e-msg') };
+  function setErr(k, m) { E[k].textContent = m || ''; if (m) F[k].setAttribute('aria-invalid', 'true'); else F[k].removeAttribute('aria-invalid'); }
+  function validate() {
+    let first = null, bad = false;
+    const n = F.name.value.trim(), m = F.mail.value.trim(), t = F.msg.value;
+    if (n.length < 2) { setErr('name', 'Please enter your name (at least 2 characters).'); bad = true; first = first || F.name; } else setErr('name');
+    if (!m) { setErr('mail', 'Please enter your email address.'); bad = true; first = first || F.mail; }
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(m)) { setErr('mail', 'That email address does not look complete, e.g. name@example.com.'); bad = true; first = first || F.mail; }
+    else setErr('mail');
+    if (t.length > 500) { setErr('msg', 'Please keep the message under 500 characters (now ' + t.length + ').'); bad = true; first = first || F.msg; } else setErr('msg');
+    return { bad: bad, first: first };
+  }
+  ['name', 'mail', 'msg'].forEach(function (k) { F[k].addEventListener('input', function () { if (F[k].getAttribute('aria-invalid')) validate(); ok.hidden = true; }); });
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const v = validate();
+    if (v.bad) { ok.hidden = true; v.first.focus(); return; }
+    ok.hidden = false;
+    ok.textContent = 'Thank you, ' + F.name.value.trim() + '. This is a demo: nothing was sent, stored or shared. Your configuration would have been: ' + cfgText() + '.';
+  });
+}
+
+/* ---------- No-WebGL fallback ---------- */
+function useFallback(reason) {
+  if (reason) { try { console.warn('[ORVELLE] 3D disabled:', reason); } catch (e) {} }
+  root.classList.add('nogl');
+  const d = new Date(), hA = ((d.getHours() % 12) + d.getMinutes() / 60) * 30, mA = d.getMinutes() * 6;
+  let ticks = '';
+  for (let i = 0; i < 12; i++) ticks += '<line x1="120" y1="152" x2="120" y2="' + (i % 3 ? 158 : 164) + '" transform="rotate(' + (i * 30) + ' 120 210)" stroke="var(--c-case)" stroke-width="' + (i % 3 ? 2 : 3.5) + '"/>';
+  const svg = '<svg viewBox="0 0 240 420" aria-hidden="true" focusable="false">' +
+    '<rect x="88" y="0" width="64" height="150" rx="10" fill="var(--c-strap)"/><rect x="88" y="270" width="64" height="150" rx="10" fill="var(--c-strap)"/>' +
+    '<rect x="204" y="203" width="12" height="14" rx="3" fill="var(--c-case)"/>' +
+    '<circle cx="120" cy="210" r="90" fill="var(--c-case)"/><circle cx="120" cy="210" r="78" fill="rgba(0,0,0,.28)"/>' +
+    '<circle cx="120" cy="210" r="72" fill="var(--c-dial)"/><circle cx="120" cy="210" r="66" fill="none" stroke="var(--c-ink)" stroke-opacity=".35"/>' +
+    ticks + '<text x="120" y="184" text-anchor="middle" font-family="Cormorant Garamond,Georgia,serif" font-size="11" letter-spacing="3" fill="var(--c-ink)">ORVELLE</text>' +
+    '<line x1="120" y1="210" x2="120" y2="172" stroke="var(--c-ink)" stroke-width="4" stroke-linecap="round" transform="rotate(' + hA + ' 120 210)"/>' +
+    '<line x1="120" y1="210" x2="120" y2="156" stroke="var(--c-ink)" stroke-width="2.6" stroke-linecap="round" transform="rotate(' + mA + ' 120 210)"/>' +
+    '<circle cx="120" cy="210" r="4" fill="#C77D4B"/></svg>';
+  $$('[data-fb]').forEach(function (n) { n.innerHTML = svg; });
+  const l = $('#loader'); if (l) l.classList.add('done');
+}
+
+/* ==========================================================================
+   3D SCENE
+   ========================================================================== */
+function initScene() {
+  const T = window.THREE;
+  if (!T) throw new Error('Three.js did not load');
+  const canvas = $('#gl');
+  let renderer;
+  try {
+    renderer = new T.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+  } catch (e) { throw new Error('WebGL unavailable'); }
+  if (!renderer.getContext()) throw new Error('WebGL unavailable');
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputEncoding = T.sRGBEncoding;
+  renderer.toneMapping = T.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.92;
+
+  const scene = new T.Scene();
+  const CAM_Z = 12;
+  const camera = new T.PerspectiveCamera(28, 1, 0.1, 60);
+  camera.position.set(0, 0, CAM_Z);
+
+  /* --- adaptive resolution --- */
+  const coarse = window.matchMedia && matchMedia('(pointer:coarse)').matches;
+  const dprMax = Math.min(window.devicePixelRatio || 1, coarse ? 2 : 2.5);
+  let dpr = Math.min(dprMax, coarse ? 1.75 : 2);
+  function resize() {
+    renderer.setPixelRatio(dpr);
+    renderer.setSize(window.innerWidth, window.innerHeight, false);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize); resize();
+
+  /* --- image based lighting from a tiny procedural "studio" --- */
+  (function () {
+    const env = new T.Scene();
+    env.background = new T.Color(0x120509);
+    function panel(w, h, x, y, z, col, k, ry, rx) {
+      const m = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({ color: new T.Color(col).multiplyScalar(k), side: T.DoubleSide }));
+      m.position.set(x, y, z); m.rotation.set(rx || 0, ry || 0, 0); env.add(m);
+    }
+    panel(14, 6, 0, 9, 2, 0xffffff, 5.5, 0, Math.PI / 2);      // overhead softbox
+    panel(6, 12, -10, 1, 3, 0xfff4e4, 3.2, Math.PI / 2);      // warm key left
+    panel(5, 10, 10, 0, 1, 0xffe9d2, 1.8, -Math.PI / 2);      // soft right
+    panel(10, 4, 0, -2, -10, 0x5FB7AE, 1.4, 0);               // teal back kicker
+    panel(12, 3, 0, -8, 3, 0x2a0a14, 0.8, 0, -Math.PI / 2);   // dark floor
+    panel(8, 5, 0, 2, 11, 0xfff0e0, 1.0, Math.PI);            // soft front fill
+    const pm = new T.PMREMGenerator(renderer);
+    scene.environment = pm.fromScene(env, 0.02).texture;
+    pm.dispose();
+    env.traverse(function (o) { if (o.isMesh) { o.geometry.dispose(); o.material.dispose(); } });
+  })();
+  scene.add(new T.HemisphereLight(0xfff0e0, 0x2a0a14, 0.2));
+  const key = new T.DirectionalLight(0xfff0dc, 0.9); key.position.set(-3, 5, 7); scene.add(key);
+  const rim = new T.DirectionalLight(0x5FB7AE, 0.4); rim.position.set(4, -2, -5); scene.add(rim);
+
+  /* --- materials --- */
+  const aniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  const std = function (o) { return new T.MeshStandardMaterial(o); };
+  const satin = std({ color: 0xD9B87A, metalness: 1, roughness: 0.42, envMapIntensity: 1.15 });
+  const polish = std({ color: 0xD9B87A, metalness: 1, roughness: 0.14, envMapIntensity: 1.25 });
+  const backMat = std({ color: 0xD9B87A, metalness: 1, roughness: 0.3 });
+  const rimMat = std({ color: 0xD9B87A, metalness: 1, roughness: 0.16 });
+  const idxMat = std({ color: 0xD9B87A, metalness: 1, roughness: 0.18 });
+  const handMat = std({ color: 0xD9B87A, metalness: 1, roughness: 0.18 });
+  const secMat = std({ color: 0xC77D4B, metalness: 1, roughness: 0.2 });
+  const glassMat = new T.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0.03, transparent: true, opacity: 0.16, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.7, depthWrite: false });
+  const backGlass = new T.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0.04, transparent: true, opacity: 0.12, clearcoat: 1, envMapIntensity: 1.5, depthWrite: false, side: T.DoubleSide });
+  const gearMat = std({ color: 0xd2a76a, metalness: 0.95, roughness: 0.3 });
+  const bridgeMat = std({ color: 0xcc9a64, metalness: 1, roughness: 0.24 });
+  const rotorMat = std({ color: 0xC77D4B, metalness: 1, roughness: 0.22 });
+  const balMat = std({ color: 0xe0bd7c, metalness: 1, roughness: 0.2 });
+  const jewelMat = std({ color: 0xb3263e, metalness: 0, roughness: 0.08 });
+  const screwMat = std({ color: 0xb8b2a8, metalness: 1, roughness: 0.25 });
+  [satin, polish, backMat, rimMat, idxMat, handMat, secMat, glassMat, backGlass, gearMat, bridgeMat, rotorMat, balMat, jewelMat, screwMat].forEach(function (m) { m.color.convertSRGBToLinear(); }); // r128: hex colours are sRGB
+  const plateTex = (function () {
+    const c = doc.createElement('canvas'); c.width = c.height = 512; const x = c.getContext('2d');
+    x.fillStyle = '#b48a55'; x.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 520; i++) {
+      const px = Math.random() * 512, py = Math.random() * 512, r = 10 + Math.random() * 10;
+      for (let k = 0; k < 2; k++) {
+        const g = x.createRadialGradient(px, py, r * 0.2, px, py, r);
+        g.addColorStop(0, 'rgba(255,238,200,.20)'); g.addColorStop(0.8, 'rgba(60,30,10,.14)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+        x.fillStyle = g; x.beginPath(); x.arc(px, py, r, 0, 6.2832); x.fill();
+      }
+    }
+    const t = new T.CanvasTexture(c); t.wrapS = t.wrapT = T.RepeatWrapping; t.offset.set(0.5, 0.5); t.encoding = T.sRGBEncoding; t.anisotropy = aniso; return t;
+  })();
+  const plateMat = std({ color: 0xffffff, map: plateTex, metalness: 0.85, roughness: 0.42, envMapIntensity: 0.8 });
+
+  /* --- dial texture (alpha-cut aperture so the balance shows through) --- */
+  const dialCanvas = doc.createElement('canvas'); dialCanvas.width = dialCanvas.height = 1024;
+  const dialTex = new T.CanvasTexture(dialCanvas); dialTex.encoding = T.sRGBEncoding; dialTex.anisotropy = aniso;
+  const DIAL_R = 0.84, AP = { x: 0, y: -0.40, r: 0.19 };
+  function spaced(c, txt, x, y, sp) {
+    let w = 0; const ws = []; for (let i = 0; i < txt.length; i++) { const m = c.measureText(txt[i]).width; ws.push(m); w += m; }
+    w += sp * (txt.length - 1); let cx = x - w / 2; c.textAlign = 'left';
+    for (let i = 0; i < txt.length; i++) { c.fillText(txt[i], cx, y); cx += ws[i] + sp; }
+  }
+  function drawDial() {
+    const th = OPT.dial[cfg.dial], c = dialCanvas.getContext('2d'), S = 1024, R = S / 2, U = R / DIAL_R;
+    c.clearRect(0, 0, S, S); c.save(); c.beginPath(); c.arc(R, R, R - 1, 0, 6.2832); c.clip();
+    const g = c.createRadialGradient(R, R, 0, R, R, R);
+    g.addColorStop(0, th.c0); g.addColorStop(0.65, th.c1); g.addColorStop(1, th.c2); c.fillStyle = g; c.fillRect(0, 0, S, S);
+    for (let i = 0; i < 720; i++) {
+      const a = i / 720 * 6.2832, ca = Math.cos(a), sa = Math.sin(a);
+      c.strokeStyle = i % 2 ? 'rgba(255,255,255,' + th.sun + ')' : 'rgba(0,0,0,' + (th.sun * 1.5) + ')';
+      c.lineWidth = 1.7; c.beginPath(); c.moveTo(R + ca * 30, R + sa * 30); c.lineTo(R + ca * R, R + sa * R); c.stroke();
+    }
+    c.strokeStyle = th.ink; c.globalAlpha = 0.9;
+    for (let i = 0; i < 60; i++) {
+      const a = i / 60 * 6.2832, l = i % 5 ? 0.018 : 0.034, r0 = R - 10, r1 = r0 - l * R * 2.2;
+      c.lineWidth = i % 5 ? 2.2 : 4.2; c.beginPath(); c.moveTo(R + Math.sin(a) * r0, R - Math.cos(a) * r0); c.lineTo(R + Math.sin(a) * r1, R - Math.cos(a) * r1); c.stroke();
+    }
+    c.globalAlpha = 0.4; c.lineWidth = 2; c.beginPath(); c.arc(R, R, R * 0.885, 0, 6.2832); c.stroke(); c.globalAlpha = 1;
+    c.fillStyle = th.ink; c.textBaseline = 'middle';
+    c.font = '600 58px "Cormorant Garamond", Georgia, serif'; spaced(c, 'ORVELLE', R, R - 0.33 * U, 20);
+    c.font = '600 26px "Manrope", Arial, sans-serif'; c.globalAlpha = 0.85; spaced(c, 'MERIDIAN', R, R - 0.22 * U, 12);
+    c.globalAlpha = 1; c.restore();
+    c.globalCompositeOperation = 'destination-out'; c.fillStyle = '#000';
+    c.beginPath(); c.arc(R + AP.x * U, R - AP.y * U, AP.r * U, 0, 6.2832); c.fill(); c.globalCompositeOperation = 'source-over';
+    dialTex.needsUpdate = true;
+  }
+
+  /* --- geometry helpers --- */
+  function gearGeom(teeth, rPitch, depth, holeR) {
+    const rOut = rPitch + 0.012, rRoot = rPitch - 0.014, sh = new T.Shape();
+    for (let i = 0; i < teeth; i++) {
+      const a0 = i / teeth * 6.2832, da = 6.2832 / teeth;
+      [[0, rRoot], [0.2, rRoot], [0.34, rOut], [0.66, rOut], [0.8, rRoot]].forEach(function (q, k) {
+        const x = Math.cos(a0 + da * q[0]) * q[1], y = Math.sin(a0 + da * q[0]) * q[1];
+        if (i === 0 && k === 0) sh.moveTo(x, y); else sh.lineTo(x, y);
+      });
+    }
+    sh.closePath();
+    const h = new T.Path(); h.absarc(0, 0, holeR, 0, 6.2832, true); sh.holes.push(h);
+    const mid = (holeR + rRoot) / 2, sr = (rRoot - holeR) * 0.27;
+    for (let k = 0; k < 4; k++) {
+      const a = k * Math.PI / 2 + Math.PI / 4, p = new T.Path(); p.absarc(Math.cos(a) * mid, Math.sin(a) * mid, sr, 0, 6.2832, true); sh.holes.push(p);
+    }
+    return new T.ExtrudeGeometry(sh, { depth: depth, bevelEnabled: false, curveSegments: 6 });
+  }
+  function capsule(ax, ay, bx, by, w) {
+    const s = new T.Shape(), th = Math.atan2(by - ay, bx - ax), r = w / 2;
+    s.absarc(bx, by, r, th - Math.PI / 2, th + Math.PI / 2, false);
+    s.absarc(ax, ay, r, th + Math.PI / 2, th + Math.PI * 1.5, false);
+    return s;
+  }
+  function extrude(shape, d, bevel) {
+    return new T.ExtrudeGeometry(shape, { depth: d, bevelEnabled: !!bevel, bevelThickness: bevel || 0, bevelSize: bevel || 0, bevelSegments: 1, curveSegments: 12 });
+  }
+  function handGeom(len, w, tail, d) {
+    const s = new T.Shape();
+    s.moveTo(0, -tail); s.lineTo(w / 2, 0); s.lineTo(w * 0.28, len * 0.72); s.lineTo(0, len); s.lineTo(-w * 0.28, len * 0.72); s.lineTo(-w / 2, 0); s.closePath();
+    return extrude(s, d, 0);
+  }
+  function lathe(pts, seg) {
+    const g = new T.LatheGeometry(pts.map(function (p) { return new T.Vector2(p[0], p[1]); }), seg || 96);
+    g.rotateX(Math.PI / 2); return g;
+  }
+  function mesh(g, m) { return new T.Mesh(g, m); }
+  function jewel(x, y, z) {
+    const gr = new T.Group();
+    const j = mesh(new T.CylinderGeometry(0.034, 0.034, 0.03, 16), jewelMat); j.rotation.x = Math.PI / 2; j.position.set(x, y, z);
+    const r = mesh(new T.TorusGeometry(0.036, 0.007, 6, 18), screwMat); r.position.set(x, y, z);
+    gr.add(j); gr.add(r); return gr;
+  }
+  function screw(x, y, z) {
+    const s = mesh(new T.CylinderGeometry(0.022, 0.022, 0.02, 12), screwMat); s.rotation.x = Math.PI / 2; s.position.set(x, y, z); return s;
+  }
+
+  /* --- the watch --- */
+  const pivot = new T.Group(); scene.add(pivot);
+  const watch = new T.Group(); pivot.add(watch);
+  const layers = [];
+  function addLayer(label, base, end, mats, lx, ly) {
+    const g = new T.Group(); g.position.z = base; watch.add(g);
+    const L = { g: g, base: base, end: end, mats: mats, hl: 0, goal: 0, label: label, lx: lx, ly: ly };
+    layers.push(L); return L;
+  }
+
+  // case (stays put)
+  const caseMid = mesh(lathe([[0.8, -0.2], [0.93, -0.2], [1.0, -0.15], [1.035, -0.06], [1.035, 0.06], [1.01, 0.13], [0.985, 0.15], [0.84, 0.15], [0.84, -0.2], [0.8, -0.2]]), satin);
+  const caseBezel = mesh(lathe([[0.85, 0.14], [0.99, 0.15], [0.985, 0.19], [0.93, 0.215], [0.86, 0.215], [0.85, 0.19], [0.85, 0.14]]), polish);
+  satin.side = polish.side = T.DoubleSide;
+  watch.add(caseMid); watch.add(caseBezel);
+  // lugs
+  const lugShape = new T.Shape();
+  lugShape.moveTo(0.52, 0.72); lugShape.lineTo(0.8, 0.72); lugShape.lineTo(0.76, 1.02); lugShape.lineTo(0.68, 1.25); lugShape.lineTo(0.52, 1.27); lugShape.closePath();
+  const lugGeo = extrude(lugShape, 0.2, 0.03); lugGeo.translate(0, 0, -0.1);
+  [[1, 1], [-1, 1], [1, -1], [-1, -1]].forEach(function (s) {
+    const l = mesh(lugGeo, polish); l.scale.set(s[0], s[1], 1); watch.add(l);
+  });
+  [1.18, -1.18].forEach(function (y) {
+    const b = mesh(new T.CylinderGeometry(0.035, 0.035, 1.04, 12), screwMat); b.rotation.z = Math.PI / 2; b.position.set(0, y, -0.02); watch.add(b);
+  });
+  // crown
+  const crown = new T.Group(); crown.position.set(1.07, 0, 0); watch.add(crown);
+  const crownBody = mesh(new T.CylinderGeometry(0.115, 0.115, 0.22, 24), polish); crownBody.rotation.z = Math.PI / 2; crownBody.position.x = 0.1;
+  const crownTube = mesh(new T.CylinderGeometry(0.06, 0.06, 0.1, 16), satin); crownTube.rotation.z = Math.PI / 2; crownTube.position.x = -0.02;
+  const crownCap = mesh(new T.CylinderGeometry(0.075, 0.075, 0.02, 24), rimMat); crownCap.rotation.z = Math.PI / 2; crownCap.position.x = 0.215;
+  crown.add(crownBody); crown.add(crownTube); crown.add(crownCap);
+  const knurl = new T.Group();
+  for (let i = 0; i < 20; i++) {
+    const a = i / 20 * 6.2832, k = mesh(new T.BoxGeometry(0.2, 0.02, 0.04), polish);
+    k.position.set(0.1, Math.cos(a) * 0.117, Math.sin(a) * 0.117); k.rotation.x = -a; knurl.add(k);
+  }
+  crown.add(knurl);
+
+  // layer: sapphire crystal
+  const L_crystal = addLayer('Sapphire crystal', 0.21, 1.95, [glassMat], 0.7, 0.62);
+  (function () {
+    const rad = 6, th = Math.asin(0.86 / rad), g = new T.SphereGeometry(rad, 64, 12, 0, 6.2832, 0, th);
+    g.rotateX(Math.PI / 2); g.translate(0, 0, -rad * Math.cos(th));
+    const m = mesh(g, glassMat); m.renderOrder = 10; L_crystal.g.add(m);
+  })();
+
+  // layer: hands
+  const L_hands = addLayer('Hands', 0.06, 1.45, [handMat, secMat], -0.7, 0.4);
+  const hourH = new T.Group(), minH = new T.Group(), secH = new T.Group();
+  hourH.add(mesh(handGeom(0.5, 0.085, 0.1, 0.014), handMat)); hourH.position.z = 0.012;
+  minH.add(mesh(handGeom(0.76, 0.06, 0.12, 0.014), handMat)); minH.position.z = 0.03;
+  secH.position.z = 0.048;
+  (function () {
+    const s = new T.Shape(); s.moveTo(-0.006, -0.2); s.lineTo(0.006, -0.2); s.lineTo(0.006, 0.8); s.lineTo(-0.006, 0.8); s.closePath();
+    secH.add(mesh(extrude(s, 0.008, 0), secMat));
+    const cw = mesh(new T.CylinderGeometry(0.035, 0.035, 0.012, 20), secMat); cw.rotation.x = Math.PI / 2; cw.position.y = -0.17; secH.add(cw);
+  })();
+  const cap = mesh(new T.CylinderGeometry(0.04, 0.04, 0.07, 20), secMat); cap.rotation.x = Math.PI / 2; cap.position.z = 0.04;
+  [hourH, minH, secH, cap].forEach(function (h) { L_hands.g.add(h); });
+
+  // layer: dial + indices + aperture rim
+  const L_dial = addLayer('Dial & indices', 0, 0.95, [], 0.8, 0.2);
+  const dialMat = std({ color: 0xffffff, map: dialTex, roughness: 0.78, metalness: 0.0, envMapIntensity: 0.3, alphaTest: 0.5, side: T.DoubleSide });
+  L_dial.mats = [dialMat, idxMat, rimMat];
+  L_dial.g.add(mesh(new T.CircleGeometry(DIAL_R, 96), dialMat));
+  for (let i = 0; i < 12; i++) {
+    const a = i / 12 * 6.2832, big = i % 3 === 0, w = big ? 0.05 : 0.032, len = big ? 0.15 : 0.12;
+    const m = mesh(new T.BoxGeometry(w, len, 0.022), idxMat);
+    m.position.set(Math.sin(a) * 0.62, Math.cos(a) * 0.62, 0.012); m.rotation.z = -a; L_dial.g.add(m);
+  }
+  const apRim = mesh(new T.TorusGeometry(AP.r + 0.008, 0.013, 10, 64), rimMat); apRim.position.set(AP.x, AP.y, 0.006); L_dial.g.add(apRim);
+  const dialRim = mesh(new T.TorusGeometry(DIAL_R + 0.004, 0.012, 8, 96), rimMat); L_dial.g.add(dialRim);
+
+  // layer: mainplate (skeletonised) + balance
+  const L_plate = addLayer('Mainplate & balance', -0.05, 0.45, [plateMat, balMat], -0.78, -0.2);
+  const GEARS = [
+    { t: 30, x: -0.32, y: 0.10 }, { t: 18 }, { t: 26 }, { t: 14 }, { t: 22 }
+  ];
+  (function () {
+    const m = 0.016, g1 = GEARS[0]; GEARS.forEach(function (g) { g.r = g.t * m / 2; });
+    function place(g, from, deg) { const a = deg * Math.PI / 180, d = from.r + g.r; g.x = from.x + Math.cos(a) * d; g.y = from.y + Math.sin(a) * d; }
+    place(GEARS[1], g1, 25); place(GEARS[2], GEARS[1], -40); place(GEARS[3], GEARS[2], -110); place(GEARS[4], g1, -100);
+  })();
+  (function () {
+    const sh = new T.Shape(); sh.absarc(0, 0, 0.82, 0, 6.2832, false);
+    const wins = [[GEARS[0].x, GEARS[0].y, 0.13], [GEARS[1].x, GEARS[1].y, 0.08], [GEARS[2].x, GEARS[2].y, 0.115], [GEARS[3].x, GEARS[3].y, 0.034], [GEARS[4].x, GEARS[4].y, 0.095], [AP.x, AP.y, AP.r + 0.01]];
+    wins.forEach(function (w) { const p = new T.Path(); p.absarc(w[0], w[1], w[2], 0, 6.2832, true); sh.holes.push(p); });
+    const pl = mesh(extrude(sh, 0.025, 0.004), plateMat); L_plate.g.add(pl);
+  })();
+  const balance = new T.Group(); balance.position.set(AP.x, AP.y, 0.045); L_plate.g.add(balance);
+  (function () {
+    balance.add(mesh(new T.TorusGeometry(0.135, 0.014, 8, 48), balMat));
+    for (let k = 0; k < 3; k++) { const s = mesh(new T.BoxGeometry(0.27, 0.014, 0.012), balMat); s.rotation.z = k * Math.PI / 3; balance.add(s); }
+    const hub = mesh(new T.CylinderGeometry(0.03, 0.03, 0.03, 16), balMat); hub.rotation.x = Math.PI / 2; balance.add(hub);
+    const pts = []; for (let i = 0; i <= 140; i++) { const a = i / 140 * 5 * 6.2832, r = 0.025 + i / 140 * 0.075; pts.push(new T.Vector3(Math.cos(a) * r, Math.sin(a) * r, 0.014)); }
+    balance.add(new T.Line(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({ color: 0xe9d6a5 })));
+  })();
+  (function () {
+    const cock = mesh(extrude(capsule(-0.3, -0.54, AP.x, AP.y, 0.07), 0.02, 0.003), bridgeMat); cock.position.z = 0.09; L_plate.g.add(cock);
+    L_plate.g.add(jewel(AP.x, AP.y, 0.115)); L_plate.mats.push(bridgeMat, jewelMat);
+  })();
+
+  // layer: gear train
+  const L_gears = addLayer('Gear train', -0.09, -0.05, [gearMat], 0.76, -0.45);
+  const gearMeshes = [];
+  GEARS.forEach(function (g, i) {
+    const m = mesh(gearGeom(g.t, g.r, 0.018, g.r * 0.18), gearMat); m.position.set(g.x, g.y, 0); m.userData.w = (i === 0 ? 1 : (i === 2 ? 1 : -1)) * 0.32 * GEARS[0].t / g.t; gearMeshes.push(m); L_gears.g.add(m);
+    const pin = mesh(new T.CylinderGeometry(0.02, 0.02, 0.06, 10), screwMat); pin.rotation.x = Math.PI / 2; pin.position.set(g.x, g.y, 0.01); L_gears.g.add(pin);
+  });
+
+  // layer: bridges & jewels
+  const L_bridge = addLayer('Bridges & jewels', -0.13, -0.6, [bridgeMat, jewelMat], -0.78, -0.55);
+  [[0, 4, 0.17], [1, 2, 0.15], [2, 3, 0.13]].forEach(function (b) {
+    const A = GEARS[b[0]], B = GEARS[b[1]];
+    const br = mesh(extrude(capsule(A.x, A.y, B.x, B.y, b[2]), 0.02, 0.004), bridgeMat); L_bridge.g.add(br);
+    [A, B].forEach(function (p) { L_bridge.g.add(jewel(p.x, p.y, 0.035)); L_bridge.g.add(screw(p.x + 0.0, p.y + (p === A ? 0.08 : -0.08) * 0.9, 0.028)); });
+  });
+
+  // layer: rotor
+  const L_rotor = addLayer('Winding rotor', -0.17, -1.1, [rotorMat], 0.7, -0.62);
+  const rotor = new T.Group(); L_rotor.g.add(rotor);
+  (function () {
+    const sh = new T.Shape(); sh.absarc(0, 0, 0.78, -0.15 * Math.PI, 0.85 * Math.PI, false); sh.absarc(0, 0, 0.16, 0.85 * Math.PI, -0.15 * Math.PI, true);
+    const r = mesh(extrude(sh, 0.03, 0.006), rotorMat); rotor.add(r);
+    const hub = mesh(new T.CylinderGeometry(0.1, 0.1, 0.06, 28), screwMat); hub.rotation.x = Math.PI / 2; hub.position.z = 0.02; rotor.add(hub);
+  })();
+
+  // layer: caseback with sapphire window
+  const L_back = addLayer('Caseback', -0.24, -1.65, [backMat, backGlass], -0.7, -0.8);
+  (function () {
+    const sh = new T.Shape(); sh.absarc(0, 0, 0.92, 0, 6.2832, false); const h = new T.Path(); h.absarc(0, 0, 0.72, 0, 6.2832, true); sh.holes.push(h);
+    L_back.g.add(mesh(extrude(sh, 0.04, 0.005), backMat));
+    const win = mesh(new T.CircleGeometry(0.72, 64), backGlass); win.position.z = 0.02; L_back.g.add(win);
+  })();
+
+  /* --- strap (rebuilt on change) --- */
+  let strapGroup = null, strapOwn = [], strapKey = '';
+  function strapTexture(kind, hex) {
+    const c = doc.createElement('canvas'); c.width = 256; c.height = 1024; const x = c.getContext('2d');
+    x.fillStyle = hex; x.fillRect(0, 0, 256, 1024);
+    const n = kind === 'suede' ? 14000 : 5000;
+    for (let i = 0; i < n; i++) { x.fillStyle = Math.random() < 0.5 ? 'rgba(255,255,255,' + (kind === 'suede' ? 0.07 : 0.045) + ')' : 'rgba(0,0,0,' + (kind === 'suede' ? 0.09 : 0.07) + ')'; const s = 1 + Math.random() * (kind === 'suede' ? 2 : 3); x.fillRect(Math.random() * 256, Math.random() * 1024, s, s); }
+    if (kind === 'leather') {
+      x.strokeStyle = 'rgba(240,226,207,.6)'; x.lineWidth = 3.2; x.setLineDash([16, 10]);
+      [30, 226].forEach(function (px) { x.beginPath(); x.moveTo(px, 0); x.lineTo(px, 1024); x.stroke(); });
+    }
+    const gr = x.createLinearGradient(0, 0, 256, 0); gr.addColorStop(0, 'rgba(0,0,0,.35)'); gr.addColorStop(0.1, 'rgba(0,0,0,0)'); gr.addColorStop(0.9, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,.35)');
+    x.fillStyle = gr; x.fillRect(0, 0, 256, 1024);
+    const t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; t.anisotropy = aniso; return t;
+  }
+  function ribbon(curve, seg, w0, w1, th) {
+    const pos = [], uv = [], idx = [], side = new T.Vector3(1, 0, 0);
+    for (let i = 0; i <= seg; i++) {
+      const t = i / seg, p = curve.getPoint(t), tg = curve.getTangent(t), nr = new T.Vector3().crossVectors(tg, side).normalize().multiplyScalar(th / 2);
+      const w = lerp(w0, w1, t) / 2;
+      const C = [[-w, 1, 0], [w, 1, 1], [w, -1, 1], [-w, -1, 0]];
+      C.forEach(function (q) { pos.push(p.x + q[0], p.y + nr.y * q[1], p.z + nr.z * q[1]); uv.push(q[2], t); });
+    }
+    for (let r = 0; r < seg; r++) {
+      const b = r * 4, n = (r + 1) * 4;
+      for (let e = 0; e < 4; e++) { const e1 = (e + 1) % 4; idx.push(b + e, b + e1, n + e, b + e1, n + e1, n + e); }
+    }
+    const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new T.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals(); return g;
+  }
+  function buildStrap() {
+    const s = OPT.strap[cfg.strap], key = s.kind + cfg.case;
+    if (key === strapKey && strapGroup) return;
+    strapKey = key;
+    if (strapGroup) { watch.remove(strapGroup); strapOwn.forEach(function (o) { o.dispose && o.dispose(); }); strapOwn = []; }
+    strapGroup = new T.Group(); watch.add(strapGroup);
+    [1, -1].forEach(function (sy) {
+      const pts = [[0, 1.1, -0.03], [0, 1.45, -0.06], [0, 1.95, -0.22], [0, 2.4, -0.55], [0, 2.68, -1.05], [0, 2.78, -1.6]].map(function (p) { return new T.Vector3(p[0], p[1] * sy, p[2]); });
+      const curve = new T.CatmullRomCurve3(pts);
+      if (s.kind === 'bracelet') {
+        const len = curve.getLength(), N = Math.round(len / 0.2), ctr = new T.InstancedMesh(new T.BoxGeometry(0.5, 0.18, 0.09), satin, N), sd = new T.InstancedMesh(new T.BoxGeometry(0.2, 0.18, 0.08), satin, N * 2);
+        strapOwn.push(ctr.geometry, sd.geometry);
+        const d = new T.Object3D(), bx = new T.Vector3(1, 0, 0), m4 = new T.Matrix4();
+        for (let i = 0; i < N; i++) {
+          const u = (i + 0.5) / N * 0.98 + 0.01, p = curve.getPointAt(u), tg = curve.getTangentAt(u), z = new T.Vector3().crossVectors(bx, tg).normalize(), xx = new T.Vector3().crossVectors(tg, z).normalize();
+          m4.makeBasis(xx, tg, z); d.position.copy(p); d.quaternion.setFromRotationMatrix(m4); d.scale.set(lerp(1, 0.8, u), 1, 1); d.updateMatrix(); ctr.setMatrixAt(i, d.matrix);
+          [-1, 1].forEach(function (q, k) { d.position.copy(p); d.translateX(q * 0.37 * lerp(1, 0.8, u)); d.updateMatrix(); sd.setMatrixAt(i * 2 + k, d.matrix); });
+        }
+        ctr.instanceMatrix.needsUpdate = true; sd.instanceMatrix.needsUpdate = true; strapGroup.add(ctr); strapGroup.add(sd);
+      } else {
+        const tex = strapTexture(s.kind, s.hex), mat = std({ map: tex, roughness: s.kind === 'suede' ? 0.95 : 0.52, metalness: 0.02, envMapIntensity: 0.35, side: T.DoubleSide });
+        const geo = ribbon(curve, 48, 1.0, 0.8, 0.085); strapOwn.push(tex, mat, geo); strapGroup.add(mesh(geo, mat));
+      }
+    });
+  }
+
+  /* --- configuration -> materials --- */
+  function setConfig() {
+    const c = OPT.case[cfg.case], d = OPT.dial[cfg.dial];
+    [satin, polish, backMat, rimMat].forEach(function (m) { m.color.set(c.hex).convertSRGBToLinear(); });
+    if (d.dark) { [idxMat, handMat].forEach(function (m) { m.color.set(0x2a0a14).convertSRGBToLinear(); m.metalness = 0.55; m.roughness = 0.3; }); }
+    else { [idxMat, handMat].forEach(function (m) { m.color.set(c.hex).convertSRGBToLinear(); m.metalness = 1; m.roughness = 0.18; }); }
+    drawDial(); buildStrap(); kick();
+  }
+  if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(function () { drawDial(); });
+
+  /* --- poses & stage tracking --- */
+  const stages = $$('[data-stage]').map(function (s) { return { id: s.dataset.stage, el: s, anchor: $('[data-anchor]', s) }; });
+  const cur = { x: 0, y: 0, s: 0.01, ry: 0.9, rx: 0, rz: 0, e: 0, fx: 0, fy: 0, m: 1 };
+  const tgt = { x: 0, y: 0, s: 1, ry: 0, rx: 0, rz: 0, e: 0, fx: 0, fy: 0, m: 1 };
+  const user = { y: 0, x: 0, last: 0, drag: false };
+  const POSE_FEAT = [
+    { ry: 0.38, rx: 0.12, m: 1.65, fx: -0.5, fy: 0.5, e: 0 },
+    { ry: -0.6, rx: 0.3, m: 1.25, fx: 0, fy: -0.1, e: 0.6 },
+    { ry: -1.15, rx: 0.04, m: 1.7, fx: 1.0, fy: 0, e: 0 }
+  ];
+  let activeStage = stages[0], storyInfo = { p: 0, step: 0 };
+  function pickStage() {
+    const mid = window.innerHeight / 2; let best = null, bd = 1e9;
+    stages.forEach(function (st) {
+      const r = st.el.getBoundingClientRect();
+      const d = (r.top <= mid && r.bottom >= mid) ? -1 : Math.min(Math.abs(r.top - mid), Math.abs(r.bottom - mid));
+      if (d < bd) { bd = d; best = st; }
+    });
+    return best || stages[0];
+  }
+  function setTargets(t) {
+    const st = activeStage, W = window.innerWidth, H = window.innerHeight;
+    const r = st.anchor.getBoundingClientRect(), visH = 2 * Math.tan(camera.fov * Math.PI / 360) * CAM_Z, visW = visH * camera.aspect, k = visH / H;
+    tgt.x = ((r.left + r.width / 2) / W - 0.5) * visW; tgt.y = -((r.top + r.height / 2) / H - 0.5) * visH;
+    const fit = Math.min(r.width * k / 2.7, r.height * k / 5.1);
+    let o = { ry: 0, rx: 0.1, rz: 0, e: 0, fx: 0, fy: 0, m: 1 };
+    const fl = reduce ? 0 : 1;
+    switch (st.id) {
+      case 'hero': o.ry = -0.5 + Math.sin(t * 0.45) * 0.12 * fl; o.rx = 0.14 + Math.sin(t * 0.6) * 0.03 * fl; o.rz = -0.1; break;
+      case 'story': {
+        const p = storyInfo.p, s1 = sm(0.14, 0.4, p), back = sm(0.88, 1, p);
+        o.e = sm(0.2, 0.4, p) * (1 - sm(0.86, 0.98, p));
+        o.m = lerp(lerp(2.3, 1.12, sm(0.12, 0.32, p)), 1.0, back);
+        o.ry = lerp(lerp(0.04, -0.7, s1), -0.12, back) - 0.12 * sm(0.4, 0.8, p);
+        o.rx = 0.08 + 0.24 * s1 * (1 - back); break;
+      }
+      case 'craft': { const f = POSE_FEAT[feat]; o.ry = f.ry + Math.sin(t * 0.5) * 0.05 * fl; o.rx = f.rx; o.m = f.m; o.fx = f.fx; o.fy = f.fy; o.e = f.e; break; }
+      case 'cfg': o.ry = 0.35 * Math.sin(t * 0.4) * fl - 0.1; o.rx = 0.08; o.m = 0.97; break;
+      case 'brand': o.ry = -0.32; o.rx = 0.3; o.m = 2.9; o.fx = 0.08; o.fy = 0.38; break;
+      default: o.ry = 0.4 + Math.sin(t * 0.4) * 0.12 * fl; o.rx = 0.1; o.m = 0.92;
+    }
+    tgt.s = fit * o.m; tgt.ry = o.ry; tgt.rx = o.rx; tgt.rz = o.rz; tgt.e = o.e; tgt.fx = o.fx; tgt.fy = o.fy;
+    // user rotation (drag / keys) fades back unless in the scroll-driven story
+    const inStory = st.id === 'story';
+    tgt.ry += inStory ? 0 : user.y; tgt.rx += inStory ? 0 : user.x;
+  }
+
+  /* --- labels & hotspots --- */
+  const labelHost = $('#labels'), labelEls = layers.map(function (L) {
+    const d = doc.createElement('div'); d.className = 'lbl'; const s = doc.createElement('span'); s.textContent = L.label; const i = doc.createElement('i');
+    d.appendChild(i); d.appendChild(s); labelHost.appendChild(d); return d;
+  });
+  const v3 = new T.Vector3();
+  function project(obj, x, y, z) {
+    v3.set(x, y, z); obj.localToWorld(v3); v3.project(camera);
+    return { x: (v3.x * 0.5 + 0.5) * window.innerWidth, y: (-v3.y * 0.5 + 0.5) * window.innerHeight, z: v3.z };
+  }
+  const HOT = [[-0.68, 0.7, 0.21], [AP.x, AP.y, 0.03], [1.3, 0, 0]];
+  function updateOverlays(hl) {
+    const showL = activeStage.id === 'story' && isDesktop() && cur.e > 0.55;
+    labelEls.forEach(function (el, i) {
+      const L = layers[i];
+      if (!showL) { el.classList.remove('on'); return; }
+      const left = L.lx < 0, p = project(L.g, L.lx, L.ly, 0);
+      el.classList.toggle('left', left); el.classList.add('on'); el.classList.toggle('act', hl.indexOf(i) >= 0);
+      el.style.transform = 'translate(' + p.x.toFixed(1) + 'px,' + p.y.toFixed(1) + 'px) translate(' + (left ? '-100%' : '0') + ',-50%)';
+    });
+    const hots = $$('.hot'), inCraft = activeStage.id === 'craft';
+    if (!inCraft) { hots.forEach(function (h) { h.classList.remove('vis'); }); return; }
+    const r = activeStage.anchor.getBoundingClientRect();
+    hots.forEach(function (h, i) {
+      const q = HOT[i], p = project(watch, q[0], q[1], q[2]), x = p.x - r.left, y = p.y - r.top;
+      const inside = x > 22 && y > 22 && x < r.width - 22 && y < r.height - 22;
+      h.classList.toggle('vis', inside && Math.abs(cur.ry - tgt.ry) < 0.35);
+      h.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
+    });
+  }
+
+  /* --- interaction on anchors (drag / arrow keys) --- */
+  stages.forEach(function (st) {
+    const a = st.anchor; let px = 0, py = 0, id = null;
+    a.addEventListener('pointerdown', function (e) {
+      if (e.target.closest('.hot') || st.id === 'story') return;
+      id = e.pointerId; px = e.clientX; py = e.clientY; user.drag = true; a.classList.add('drag'); try { a.setPointerCapture(id); } catch (x) {} kick();
+    });
+    a.addEventListener('pointermove', function (e) {
+      if (!user.drag || e.pointerId !== id) return;
+      user.y += (e.clientX - px) * 0.009; user.x = clamp(user.x + (e.clientY - py) * 0.005, -0.5, 0.5); px = e.clientX; py = e.clientY; user.last = performance.now();
+    });
+    function end(e) { if (e.pointerId !== id) return; user.drag = false; id = null; a.classList.remove('drag'); user.last = performance.now(); }
+    a.addEventListener('pointerup', end); a.addEventListener('pointercancel', end);
+    a.addEventListener('keydown', function (e) {
+      if (st.id === 'story') return;
+      const k = e.key; if (k === 'ArrowLeft') user.y -= 0.3; else if (k === 'ArrowRight') user.y += 0.3; else if (k === 'ArrowUp') user.x = clamp(user.x - 0.15, -0.5, 0.5); else if (k === 'ArrowDown') user.x = clamp(user.x + 0.15, -0.5, 0.5); else return;
+      e.preventDefault(); user.last = performance.now(); kick();
+    });
+  });
+
+  /* --- render loop (pauses when hidden / off-screen) --- */
+  let running = false, last = 0, t0 = performance.now(), frames = 0, shown = false, avg = 16, calm = 0, anyVisible = true;
+  if ('IntersectionObserver' in window) {
+    const vis = new Set(), io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) vis.add(e.target); else vis.delete(e.target); });
+      anyVisible = vis.size > 0; if (anyVisible) kick();
+    });
+    stages.forEach(function (s) { io.observe(s.el); });
+  }
+  function kick() { if (!running && !doc.hidden) { running = true; last = performance.now(); requestAnimationFrame(frame); } }
+  doc.addEventListener('visibilitychange', function () { if (!doc.hidden) kick(); });
+  window.addEventListener('scroll', function () { kick(); }, { passive: true });
+  window.addEventListener('resize', kick);
+  window.addEventListener('pagehide', function () { renderer.dispose(); });
+
+  function frame(now) {
+    if (doc.hidden || !anyVisible) { running = false; return; }
+    const dt = Math.min(0.05, (now - last) / 1000) || 0.016; last = now;
+    const t = (now - t0) / 1000;
+    // adaptive pixel ratio
+    avg = avg * 0.95 + dt * 1000 * 0.05; frames++;
+    if (frames > 40 && frames % 30 === 0) {
+      if (avg > 26 && dpr > 1) { dpr = Math.max(1, dpr - 0.25); resize(); avg = 16; }
+      else if (avg < 12 && dpr < Math.min(dprMax, coarse ? 1.75 : 2)) { calm++; if (calm > 6) { dpr += 0.25; calm = 0; resize(); } }
+    }
+    storyInfo = updateStoryHud();
+    activeStage = pickStage();
+    // user rotation eases home
+    if (!user.drag && now - user.last > 2400) { user.y -= user.y * (1 - Math.exp(-dt * 1.4)); user.x -= user.x * (1 - Math.exp(-dt * 1.4)); if (Math.abs(user.y) > 3.14159) user.y -= Math.sign(user.y) * 6.28318; }
+    setTargets(t);
+    const kP = reduce ? 1 : 1 - Math.exp(-dt * 7), kS = reduce ? 1 : 1 - Math.exp(-dt * 9);
+    ['x', 'y'].forEach(function (a) { cur[a] = lerp(cur[a], tgt[a], frames < 3 ? 1 : kS); });
+    ['s', 'rx', 'rz', 'e', 'fx', 'fy'].forEach(function (a) { cur[a] = lerp(cur[a], tgt[a], frames < 3 ? (a === 's' ? 0.35 : 1) : kP); });
+    cur.ry = lerp(cur.ry, tgt.ry, frames < 3 ? 0.12 : kP);
+    pivot.position.set(cur.x, cur.y, 0); pivot.scale.setScalar(Math.max(0.001, cur.s));
+    pivot.rotation.set(cur.rx, cur.ry, cur.rz, 'YXZ');
+    watch.position.set(-cur.fx, -cur.fy, 0);
+    // explode
+    const e = cur.e * cur.e * (3 - 2 * cur.e);
+    layers.forEach(function (L) { L.g.position.z = lerp(L.base, L.end, e); });
+    // highlight for story steps
+    const step = storyInfo.step, hl = activeStage.id === 'story' ? (step === 1 ? [0, 1] : step === 2 ? [2] : step === 3 ? [3] : step === 4 ? [4, 5] : step === 5 ? [6, 7] : []) : [];
+    layers.forEach(function (L, i) {
+      L.goal = hl.indexOf(i) >= 0 ? 1 : 0; L.hl = lerp(L.hl, L.goal, 1 - Math.exp(-dt * 8));
+      L.mats.forEach(function (m) { if (m.emissive) { m.emissive.set(0xC77D4B).convertSRGBToLinear(); m.emissiveIntensity = L.hl * 0.5; } });
+    });
+    // time & mechanics
+    const dd = new Date(), ms = dd.getMilliseconds(); let sec = dd.getSeconds() + (reduce ? 0 : ms / 1000);
+    const min = dd.getMinutes() + sec / 60, hr = (dd.getHours() % 12) + min / 60;
+    secH.rotation.z = -sec / 60 * 6.28318; minH.rotation.z = -min / 60 * 6.28318; hourH.rotation.z = -hr / 12 * 6.28318;
+    if (!reduce) {
+      balance.rotation.z = Math.sin(t * 6.28318 * 2) * 0.85;
+      gearMeshes.forEach(function (g) { g.rotation.z = t * g.userData.w; });
+      rotor.rotation.z = Math.sin(t * 0.7) * 0.9;
+    }
+    pivot.updateMatrixWorld(true);
+    updateOverlays(hl);
+    renderer.render(scene, camera);
+    if (!shown && frames > 2) { shown = true; canvas.classList.add('on'); const l = $('#loader'); l && l.classList.add('done'); }
+    if (reduce && Math.abs(cur.x - tgt.x) < 0.001 && !user.drag && frames > 5) { /* static scene still renders on scroll via kick() */ }
+    requestAnimationFrame(frame);
+  }
+
+  setConfig();
+  kick();
+  return { setConfig: setConfig };
+}
+
+/* ---------- boot ---------- */
+buildChrome(); buildConfigurator(); buildCraft(); buildForm(); refresh(); updateStoryHud();
+window.addEventListener('scroll', updateStoryHud, { passive: true });
+try { scene3d = initScene(); refresh(); }
+catch (err) { scene3d = null; useFallback(err && err.message); }
+})();
+</script>
+</body>
+</html>
